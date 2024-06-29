@@ -127,18 +127,23 @@ async def biweekly(ctx: InteractionContext):
     if result:
         
         await dbInstance.biweeklySet(xrpId)
+        nftLink = await dbInstance.getRandomNFT(xrpId)
+        
         embed = Embed(title="XRAIN Claim",
                       description=f"Congratulations you have claimed your XRPLRainforest Bonus XRAIN rewards totaling **__{result}__** XRAINs !!",
                       timestamp=datetime.now())
 
         embed.set_footer(text="XRPLRainforest Bi-weekly Bonus")
+        
+        if nftLink != "NoNFTFound":
+            embed.add_image(nftLink)
 
         await ctx.send(embed=embed)
     else:
         embed = Embed(title="XRAIN Claim",
                       description="Bonus Bi-weekly XRAIN rewards has already been claimed or the ReputationalFlag has been triggered for this xrpId",
                       timestamp=datetime.now())
-
+        
         embed.set_footer(text="XRPLRainforest Bi-weekly Bonus")
 
         await ctx.send(embed=embed)

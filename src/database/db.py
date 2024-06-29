@@ -166,3 +166,31 @@ class XparrotDB:
                     if self.verbose:
                         print(f"dailySet({xrpId}): {e}")
                     await session.rollback()
+                    
+    async def getRandomNFT(self, xrpId) -> str:
+        async with self.asyncSessionMaker() as session:
+            query = select(
+                        NFTTraitList.nftlink
+                    ).filter(
+                        NFTTraitList.xrpId == xrpId,
+                        NFTTraitList.nftlink != ''
+                    ).order_by(
+                        func.random()
+                    ).limit(1)
+            queryResult = await session.execute(query)
+            queryResult = queryResult.first()
+            
+            print(queryResult)
+            
+            if queryResult:
+                nftLink = queryResult[0]
+                
+                if nftLink == "":
+                    print(f"[DB]    getRandomNFT({xrpId}): NoNFTFound") if self.verbose else None
+                    return 'NoNFTFound'
+                
+                print(f"[DB]    getRandomNFT({xrpId}): {nftLink}") if self.verbose else None
+                return nftLink
+            
+            print(f"[DB]    getRandomNFT({xrpId}): NoNFTFound") if self.verbose else None
+            return 'NoNFTFound'
