@@ -6,6 +6,7 @@ from database.models.nftTraitList import NFTTraitList
 from sqlalchemy.sql import func
 from sqlalchemy.types import DateTime
 from datetime import timedelta
+from sqlalchemy.future import select
 
 class XparrotDB:
     def __init__(self, host, dbName, username, password, verbose):
@@ -16,7 +17,7 @@ class XparrotDB:
         self.asyncSessionMaker = async_sessionmaker(bind=self.dbEngine, expire_on_commit=False)
         self.vebose = verbose
     
-    def getDailyStatus(self, xrpId: str) -> dict:
+    async def getDailyStatus(self, xrpId: str) -> dict:
         # Return structure
         funcResult = {"result":"", 
                       'timeRemaining':
@@ -26,58 +27,61 @@ class XparrotDB:
                               'second':0,
                           }}
         
-        # Query the required columns
-        query = self.rewardsSession.query(
-            RewardsTable.dailyBonusFlagDate,
-            func.now()
-        ).filter(RewardsTable.xrpId == xrpId)
-        result = query.first()
-        
-        print(f"[DB]    Query Result: {result}") if self.vebose else None
-        
-        # Check if there are results
-        # No result would only mean that xrpId is not found
-        if result:
-            lastClaim, currentTime = result
+        async with self.asyncSessionMaker() as session:
+                
+            # Query the required columns
+            query = select(
+                RewardsTable.dailyBonusFlagDate,
+                func.now()
+            ).filter(RewardsTable.xrpId == xrpId)
+            result = await session.execute(query)
+            result = result.first()
             
-            # Check if the user has ever claimed their dailies
-            # If not, the dailies are available to redeem
-            if lastClaim:
-                nextClaim = lastClaim + timedelta(days=1)
-                               
-                # Check if the currentTime is past than nextClaim
-                if nextClaim > currentTime:
-                    
-                    
-                    # compute the remaining time
-                    timeDiff:timedelta = nextClaim - currentTime
-                    
-                    # Parse the remaining time
-                    remainingHour, remainingMin, remainingSec = str(timeDiff).split(":")
-                    
-                    # Ready the return structure
-                    funcResult["result"] = 'NotReady'
-                    funcResult['timeRemaining']['hour'] = remainingHour
-                    funcResult['timeRemaining']['minute'] = remainingMin
-                    funcResult['timeRemaining']['second'] = remainingSec
-                    
-                    print(f"[DB]    getDailyStatus({xrpId}): {funcResult}") if self.vebose else None
-                    
-                    return funcResult
-                    
+            print(f"[DB]    Query Result: {result}") if self.vebose else None
+            
+            # Check if there are results
+            # No result would only mean that xrpId is not found
+            if result:
+                lastClaim, currentTime = result
+                
+                # Check if the user has ever claimed their dailies
+                # If not, the dailies are available to redeem
+                if lastClaim:
+                    nextClaim = lastClaim + timedelta(days=1)
+                                
+                    # Check if the currentTime is past than nextClaim
+                    if nextClaim > currentTime:
+                        
+                        
+                        # compute the remaining time
+                        timeDiff:timedelta = nextClaim - currentTime
+                        
+                        # Parse the remaining time
+                        remainingHour, remainingMin, remainingSec = str(timeDiff).split(":")
+                        
+                        # Ready the return structure
+                        funcResult["result"] = 'NotReady'
+                        funcResult['timeRemaining']['hour'] = remainingHour
+                        funcResult['timeRemaining']['minute'] = remainingMin
+                        funcResult['timeRemaining']['second'] = remainingSec
+                        
+                        print(f"[DB]    getDailyStatus({xrpId}): {funcResult}") if self.vebose else None
+                        
+                        return funcResult
+                        
+                    else:
+                        funcResult["result"] = 'Claimable'
+                        print(f"[DB]    getDailyStatus({xrpId}): {funcResult['result']}") if self.vebose else None
+                        return funcResult
                 else:
                     funcResult["result"] = 'Claimable'
                     print(f"[DB]    getDailyStatus({xrpId}): {funcResult['result']}") if self.vebose else None
                     return funcResult
             else:
-                funcResult["result"] = 'Claimable'
+                funcResult['result'] = "XrpIdNotFound"
                 print(f"[DB]    getDailyStatus({xrpId}): {funcResult['result']}") if self.vebose else None
                 return funcResult
-        else:
-            funcResult['result'] = "XrpIdNotFound"
-            print(f"[DB]    getDailyStatus({xrpId}): {funcResult['result']}") if self.vebose else None
-            return funcResult
-    
+        
     def getDailyAmount(self, xrpId: str) -> dict:
         funcResult = {'result':None,'amount':None,'nftLink':None}
         query = self.rewardsSession.query(
