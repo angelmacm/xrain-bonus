@@ -114,28 +114,30 @@ class XparrotDB:
                 print(f"[DB]    getDailyAmount({xrpId}): {funcResult['result']}") if self.vebose else None
                 return funcResult
     
-    def getBiWeeklyStatus(self, xrpId) -> bool | int:
-        # Return structure
-        query = self.rewardsSession.query(RewardsTable.penaltyReputationRewards,
-                                          RewardsTable.bonusXrainFlag, 
-                                          RewardsTable.reputationFlag)\
-                                    .filter(RewardsTable.xrpId == xrpId)
-        queryResult = query.first()
+    async def getBiWeeklyStatus(self, xrpId) -> bool | int:
         
-        if queryResult:
-            rewardAmount, bonusFlag, repFlag = queryResult
-            if bonusFlag == 1 or repFlag == 1:
-                
-                print(f"[DB]    getBiWeeklyStatus({xrpId}): BonusReputationFlagTriggered ") if self.vebose else None
-                return False
+        async with self.asyncSessionMaker as session:
+            query = select(RewardsTable.penaltyReputationRewards,
+                                            RewardsTable.bonusXrainFlag, 
+                                            RewardsTable.reputationFlag)\
+                                        .filter(RewardsTable.xrpId == xrpId)
+            queryResult = await session.excute(query)
+            queryResult = queryResult.first()
             
-            print(f"[DB]    getBiWeeklyStatus({xrpId}): Bi-Weekly reward is {rewardAmount}") if self.vebose else None
-            return rewardAmount
+            if queryResult:
+                rewardAmount, bonusFlag, repFlag = queryResult
+                if bonusFlag == 1 or repFlag == 1:
+                    
+                    print(f"[DB]    getBiWeeklyStatus({xrpId}): BonusReputationFlagTriggered ") if self.vebose else None
+                    return False
+                
+                print(f"[DB]    getBiWeeklyStatus({xrpId}): Bi-Weekly reward is {rewardAmount}") if self.vebose else None
+                return rewardAmount
+            
+            else:
+                print(f"[DB]    getBiWeeklyStatus({xrpId}): XrpIdNotFound") if self.vebose else None
+                return False
         
-        else:
-            print(f"[DB]    getBiWeeklyStatus({xrpId}): XrpIdNotFound") if self.vebose else None
-            return False
-    
     def biweeklySet(self, xrpId) -> None:
         try:
             self.rewardsSession.query(RewardsTable)\
