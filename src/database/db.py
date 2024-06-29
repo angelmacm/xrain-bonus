@@ -85,9 +85,9 @@ class XparrotDB:
             
     async def getBonusAmount(self, xrpId: str) -> dict:
         async with self.asyncSessionMaker() as session:
-            funcResult = {'result':None,'amount':None,'nftLink':None}
+            funcResult = {'result':None,'amount':None,'nftLink':None, 'tokenId':None}
             query = select(
-                NFTTraitList.totalXRAIN, NFTTraitList.nftlink
+                NFTTraitList.totalXRAIN, NFTTraitList.nftlink, NFTTraitList.tokenId
             ).filter(
                 NFTTraitList.xrpId == xrpId,
                 NFTTraitList.nftlink != ''
@@ -98,7 +98,7 @@ class XparrotDB:
             queryResult = queryResult.first()
             
             if queryResult:
-                xrainValue, nftLink = queryResult
+                xrainValue, nftLink, tokenId = queryResult
                 
                 if nftLink == "":
                     funcResult['result'] = 'ImageLinkNotFound'
@@ -108,6 +108,7 @@ class XparrotDB:
                 funcResult['result'] = 'Success'
                 funcResult['nftLink'] = nftLink
                 funcResult['amount'] = xrainValue
+                funcResult['tokenId'] = tokenId
                 print(f"[DB]    getBonusAmount({xrpId}): {funcResult['result']}") if self.verbose else None
                 return funcResult            
             else:
@@ -174,10 +175,11 @@ class XparrotDB:
                         print(f"[DB]    bonusSet({xrpId}): {e}")
                     await session.rollback()
                     
-    async def getRandomNFT(self, xrpId) -> str:
+    async def getRandomNFT(self, xrpId) -> dict:
         async with self.asyncSessionMaker() as session:
+            funcResult = {'nftLink':None, 'tokenId':None}
             query = select(
-                        NFTTraitList.nftlink
+                        NFTTraitList.nftlink, NFTTraitList.tokenId
                     ).filter(
                         NFTTraitList.xrpId == xrpId,
                         NFTTraitList.nftlink != ''
@@ -190,14 +192,16 @@ class XparrotDB:
             print(queryResult)
             
             if queryResult:
-                nftLink = queryResult[0]
+                nftLink, tokenId = queryResult
                 
                 if nftLink == "":
                     print(f"[DB]    getRandomNFT({xrpId}): NoNFTFound") if self.verbose else None
                     return 'NoNFTFound'
                 
-                print(f"[DB]    getRandomNFT({xrpId}): {nftLink}") if self.verbose else None
-                return nftLink
+                funcResult['nftLink'] = nftLink
+                funcResult['tokenId'] = tokenId
+                print(f"[DB]    getRandomNFT({xrpId}): {funcResult}") if self.verbose else None
+                return funcResult
             
             print(f"[DB]    getRandomNFT({xrpId}): NoNFTFound") if self.verbose else None
             return 'NoNFTFound'

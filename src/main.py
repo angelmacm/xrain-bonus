@@ -65,11 +65,12 @@ async def bonusXrain(ctx: InteractionContext):
         if claimInfo['result'] == "Success":
             claimAmount = claimInfo['amount']
             claimImage = claimInfo['nftLink']
+            tokenId = claimInfo['tokenId']
             
             await dbInstance.bonusSet(xrpId)
             
             embed = Embed(title="XRAIN Claim",
-                      description=f"Congratulations {ctx.author.display_name} you have claimed your XRPLRainforest Bonus Bonus XRAIN rewards totaling **__{claimAmount}__** XRAIN!!",
+                      description=f"Congratulations {ctx.author.display_name} you have claimed your XRPLRainforest Bonus XRAIN rewards totaling **__{claimAmount}__** XRAIN!! Claim again in **__48 Hours__**!\n\n[View NFT Details](https://xrp.cafe/nft/{tokenId})",
                       timestamp=datetime.now())
 
             embed.set_image(url=claimImage)
@@ -127,10 +128,12 @@ async def biweeklyXrain(ctx: InteractionContext):
     if result:
         
         await dbInstance.biweeklySet(xrpId)
-        nftLink = await dbInstance.getRandomNFT(xrpId)
-        
+        nftData = await dbInstance.getRandomNFT(xrpId)
+        tokenId = nftData['tokenId']
+        nftLink = nftData['nftLink']
+
         embed = Embed(title="XRAIN Claim",
-                      description=f"Congratulations you have claimed your XRPLRainforest Bonus Bi-weekly XRAIN rewards totaling **__{result}__** XRAINs !!",
+                      description=f"Congratulations you have claimed your XRPLRainforest Bonus Bi-weekly XRAIN rewards totaling **__{result}__** XRAINs !!\n\n[View NFT Details](https://xrp.cafe/nft/{tokenId})",
                       timestamp=datetime.now())
 
         embed.set_footer(text="XRPLRainforest Bi-weekly Bonus")
