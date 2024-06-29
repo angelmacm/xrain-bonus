@@ -82,35 +82,37 @@ class XparrotDB:
                 print(f"[DB]    getDailyStatus({xrpId}): {funcResult['result']}") if self.vebose else None
                 return funcResult
         
-    def getDailyAmount(self, xrpId: str) -> dict:
-        funcResult = {'result':None,'amount':None,'nftLink':None}
-        query = self.rewardsSession.query(
-            NFTTraitList.totalXRAIN, NFTTraitList.nftlink
-        ).filter(
-            NFTTraitList.xrpId == xrpId,
-            NFTTraitList.nftlink != ''
-        ).order_by(
-            func.random()
-        ).limit(1)
-        queryResult = query.first()
-        
-        if queryResult:
-            xrainValue, nftLink = queryResult
+    async def getDailyAmount(self, xrpId: str) -> dict:
+        async with self.asyncSessionMaker as session:
+            funcResult = {'result':None,'amount':None,'nftLink':None}
+            query = select(
+                NFTTraitList.totalXRAIN, NFTTraitList.nftlink
+            ).filter(
+                NFTTraitList.xrpId == xrpId,
+                NFTTraitList.nftlink != ''
+            ).order_by(
+                func.random()
+            ).limit(1)
+            queryResult = await session.execute()
+            queryResult = queryResult.first()
             
-            if nftLink == "":
-                funcResult['result'] = 'ImageLinkNotFound'
+            if queryResult:
+                xrainValue, nftLink = queryResult
+                
+                if nftLink == "":
+                    funcResult['result'] = 'ImageLinkNotFound'
+                    print(f"[DB]    getDailyAmount({xrpId}): {funcResult['result']}") if self.vebose else None
+                    return funcResult
+                
+                funcResult['result'] = 'Success'
+                funcResult['nftLink'] = nftLink
+                funcResult['amount'] = xrainValue
+                print(f"[DB]    getDailyAmount({xrpId}): {funcResult['result']}") if self.vebose else None
+                return funcResult            
+            else:
+                funcResult['result'] = "XrpIdNotFound"
                 print(f"[DB]    getDailyAmount({xrpId}): {funcResult['result']}") if self.vebose else None
                 return funcResult
-            
-            funcResult['result'] = 'Success'
-            funcResult['nftLink'] = nftLink
-            funcResult['amount'] = xrainValue
-            print(f"[DB]    getDailyAmount({xrpId}): {funcResult['result']}") if self.vebose else None
-            return funcResult            
-        else:
-            funcResult['result'] = "XrpIdNotFound"
-            print(f"[DB]    getDailyAmount({xrpId}): {funcResult['result']}") if self.vebose else None
-            return funcResult
     
     def getBiWeeklyStatus(self, xrpId) -> bool | int:
         # Return structure
