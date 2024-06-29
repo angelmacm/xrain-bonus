@@ -130,7 +130,7 @@ async def biweekly(ctx: InteractionContext):
         nftLink = await dbInstance.getRandomNFT(xrpId)
         
         embed = Embed(title="XRAIN Claim",
-                      description=f"Congratulations you have claimed your XRPLRainforest Bonus XRAIN rewards totaling **__{result}__** XRAINs !!",
+                      description=f"Congratulations you have claimed your XRPLRainforest Bonus Bi-weekly XRAIN rewards totaling **__{result}__** XRAINs !!",
                       timestamp=datetime.now())
 
         embed.set_footer(text="XRPLRainforest Bi-weekly Bonus")
