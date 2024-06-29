@@ -42,7 +42,7 @@ async def on_ready():
 # Parameters:
 #       XRP ID: [Required] XRP Address where the users hold their NFTs and the receipient of the reward
 @slash_command(
-        name="dailies",
+        name="daily-xrain",
         description="Redeem daily rewards",
         options= [
             slash_str_option(
@@ -51,7 +51,7 @@ async def on_ready():
                 required = True
             )
         ])
-async def dailies(ctx: InteractionContext):
+async def dailyXrain(ctx: InteractionContext):
     await ctx.defer() # Defer the response to wait for the function to run.
     
     print(f"[BOT]   Daily Claim requested by {ctx.author.display_name}") if botVerbosity else None
@@ -105,7 +105,7 @@ async def dailies(ctx: InteractionContext):
 # Parameters:
 #       XRP ID: [Required] XRP Address where the users hold their NFTs and the receipient of the reward 
 @slash_command(
-        name="biweekly",
+        name="biweekly-xrain",
         description="Redeem bi-weekly rewards",
         options= [
             slash_str_option(
@@ -114,7 +114,7 @@ async def dailies(ctx: InteractionContext):
                 required = True
             )
         ])
-async def biweekly(ctx: InteractionContext):
+async def biweeklyXrain(ctx: InteractionContext):
     
     print(f"[BOT]   Biweekly claim requested by {ctx.author.display_name}") if botVerbosity else None
     
