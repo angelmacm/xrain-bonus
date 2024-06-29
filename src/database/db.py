@@ -153,13 +153,16 @@ class XparrotDB:
                     await session.rollback()
             
     
-    def dailySet(self, xrpId) -> None:
-        try:
-            self.rewardsSession.query(RewardsTable)\
-                                        .filter(RewardsTable.xrpId == xrpId)\
-                                        .update({RewardsTable.dailyBonusFlagDate: func.now()})
-            self.rewardsSession.commit()
-            print(f"dailySet({xrpId}): Success") if self.vebose else None
-        except Exception as e:
-            print(f"dailySet({xrpId}): {e}") if self.vebose else None
-            self.rewardsSession.rollback()
+    async def dailySet(self, xrpId) -> None:
+        async with self.asyncSessionMaker() as session:
+            async with session.begin():
+                try:
+                    await session.execute(
+                        update(RewardsTable).where(RewardsTable.xrpId == xrpId).values(dailyBonusFlagDate=func.now())
+                    )
+                    if self.verbose:
+                        print(f"dailySet({xrpId}): Success")
+                except Exception as e:
+                    if self.verbose:
+                        print(f"dailySet({xrpId}): {e}")
+                    await session.rollback()
