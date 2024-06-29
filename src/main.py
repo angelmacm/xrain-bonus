@@ -58,15 +58,15 @@ async def dailies(ctx: InteractionContext):
     
     xrpId = ctx.args[0]
     
-    result = dbInstance.getDailyStatus(xrpId)
+    result = await dbInstance.getDailyStatus(xrpId)
     
     if result['result'] == 'Claimable':
-        claimInfo = dbInstance.getDailyAmount(xrpId)
+        claimInfo = await dbInstance.getDailyAmount(xrpId)
         if claimInfo['result'] == "Success":
             claimAmount = claimInfo['amount']
             claimImage = claimInfo['nftLink']
             
-            dbInstance.dailySet(xrpId)
+            await dbInstance.dailySet(xrpId)
             
             embed = Embed(title="XRAIN Claim",
                       description=f"Congratulations {ctx.author.display_name} you have claimed your XRPLRainforest Daily Bonus XRAIN rewards totaling **__{claimAmount}__** XRAIN!!",
@@ -122,11 +122,11 @@ async def biweekly(ctx: InteractionContext):
     
     xrpId = ctx.args[0]
     
-    result = dbInstance.getBiWeeklyStatus(xrpId)
+    result = await dbInstance.getBiWeeklyStatus(xrpId)
     
     if result:
         
-        dbInstance.biweeklySet(xrpId)
+        await dbInstance.biweeklySet(xrpId)
         embed = Embed(title="XRAIN Claim",
                       description=f"Congratulations you have claimed your XRPLRainforest Bonus XRAIN rewards totaling **__{result}__** XRAINs !!",
                       timestamp=datetime.now())
