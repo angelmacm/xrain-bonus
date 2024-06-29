@@ -1,5 +1,5 @@
 from sqlalchemy.ext.asyncio import create_async_engine, async_sessionmaker, AsyncSession
-from sqlalchemy import create_engine, and_, or_
+from sqlalchemy import create_engine, and_, or_, update
 from sqlalchemy.orm import sessionmaker
 from database.models.rewardstable import RewardsTable
 from database.models.nftTraitList import NFTTraitList
@@ -138,16 +138,19 @@ class XparrotDB:
                 print(f"[DB]    getBiWeeklyStatus({xrpId}): XrpIdNotFound") if self.vebose else None
                 return False
         
-    def biweeklySet(self, xrpId) -> None:
-        try:
-            self.rewardsSession.query(RewardsTable)\
-                                        .filter(RewardsTable.xrpId == xrpId)\
-                                        .update({RewardsTable.bonusXrainFlag: 1})
-            self.rewardsSession.commit()
-            print(f"biweeklySet({xrpId}): Success") if self.vebose else None
-        except Exception as e:
-            print(f"biweeklySet({xrpId}): {e}") if self.vebose else None
-            self.rewardsSession.rollback()
+    async def biweeklySet(self, xrpId) -> None:
+        async with self.asyncSessionMaker() as session:
+            async with session.begin():
+                try:
+                    await session.execute(
+                        update(RewardsTable).where(RewardsTable.xrpId == xrpId).values(bonusXrainFlag=1)
+                    )
+                    if self.verbose:
+                        print(f"[DB]    biweeklySet({xrpId}): Success")
+                except Exception as e:
+                    if self.verbose:
+                        print(f"[DB]    biweeklySet({xrpId}): {e}")
+                    await session.rollback()
             
     
     def dailySet(self, xrpId) -> None:
