@@ -158,13 +158,19 @@ class XparrotDB:
             async with session.begin():
                 try:
                     await session.execute(
-                        update(RewardsTable).where(RewardsTable.xrpId == xrpId).values(dailyBonusFlagDate=func.now())
+                        update(
+                            RewardsTable
+                        ).where(
+                            RewardsTable.xrpId == xrpId
+                        ).values(
+                            dailyBonusFlagDate=func.now()
+                        )
                     )
                     if self.verbose:
-                        print(f"dailySet({xrpId}): Success")
+                        print(f"[DB]  dailySet({xrpId}): Success")
                 except Exception as e:
                     if self.verbose:
-                        print(f"dailySet({xrpId}): {e}")
+                        print(f"[DB]    dailySet({xrpId}): {e}")
                     await session.rollback()
                     
     async def getRandomNFT(self, xrpId) -> str:
