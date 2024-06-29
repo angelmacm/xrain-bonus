@@ -47,7 +47,7 @@ class XparrotDB:
                 # If not, the dailies are available to redeem
                 if lastClaim and not lastClaim == "0000-00-00 00:00:00":
                     lastClaim = datetime.strptime(lastClaim,"%Y-%m-%d %H:%M:%S") if type(lastClaim) == str else lastClaim
-                    nextClaim = lastClaim + timedelta(days=1)
+                    nextClaim = lastClaim + timedelta(days=2)
                                 
                     # Check if the currentTime is past than nextClaim
                     if nextClaim > currentTime:
