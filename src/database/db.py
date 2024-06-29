@@ -17,7 +17,7 @@ class XparrotDB:
         self.asyncSessionMaker = async_sessionmaker(bind=self.dbEngine, expire_on_commit=False)
         self.verbose = verbose
     
-    async def getDailyStatus(self, xrpId: str) -> dict:
+    async def getBonusStatus(self, xrpId: str) -> dict:
         # Return structure
         funcResult = {"result":"", 
                       'timeRemaining':
@@ -66,24 +66,24 @@ class XparrotDB:
                         funcResult['timeRemaining']['minute'] = remainingMin
                         funcResult['timeRemaining']['second'] = remainingSec
                         
-                        print(f"[DB]    getDailyStatus({xrpId}): {funcResult}") if self.verbose else None
+                        print(f"[DB]    getBonusStatus({xrpId}): {funcResult}") if self.verbose else None
                         
                         return funcResult
                         
                     else:
                         funcResult["result"] = 'Claimable'
-                        print(f"[DB]    getDailyStatus({xrpId}): {funcResult['result']}") if self.verbose else None
+                        print(f"[DB]    getBonusStatus({xrpId}): {funcResult['result']}") if self.verbose else None
                         return funcResult
                 else:
                     funcResult["result"] = 'Claimable'
-                    print(f"[DB]    getDailyStatus({xrpId}): {funcResult['result']}") if self.verbose else None
+                    print(f"[DB]    getBonusStatus({xrpId}): {funcResult['result']}") if self.verbose else None
                     return funcResult
             else:
                 funcResult['result'] = "XrpIdNotFound"
-                print(f"[DB]    getDailyStatus({xrpId}): {funcResult['result']}") if self.verbose else None
+                print(f"[DB]    getBonusStatus({xrpId}): {funcResult['result']}") if self.verbose else None
                 return funcResult
             
-    async def getDailyAmount(self, xrpId: str) -> dict:
+    async def getBonusAmount(self, xrpId: str) -> dict:
         async with self.asyncSessionMaker() as session:
             funcResult = {'result':None,'amount':None,'nftLink':None}
             query = select(
@@ -102,17 +102,17 @@ class XparrotDB:
                 
                 if nftLink == "":
                     funcResult['result'] = 'ImageLinkNotFound'
-                    print(f"[DB]    getDailyAmount({xrpId}): {funcResult['result']}") if self.verbose else None
+                    print(f"[DB]    getBonusAmount({xrpId}): {funcResult['result']}") if self.verbose else None
                     return funcResult
                 
                 funcResult['result'] = 'Success'
                 funcResult['nftLink'] = nftLink
                 funcResult['amount'] = xrainValue
-                print(f"[DB]    getDailyAmount({xrpId}): {funcResult['result']}") if self.verbose else None
+                print(f"[DB]    getBonusAmount({xrpId}): {funcResult['result']}") if self.verbose else None
                 return funcResult            
             else:
                 funcResult['result'] = "XrpIdNotFound"
-                print(f"[DB]    getDailyAmount({xrpId}): {funcResult['result']}") if self.verbose else None
+                print(f"[DB]    getBonusAmount({xrpId}): {funcResult['result']}") if self.verbose else None
                 return funcResult
     
     async def getBiWeeklyStatus(self, xrpId) -> bool | int:
@@ -154,7 +154,7 @@ class XparrotDB:
                     await session.rollback()
            
     
-    async def dailySet(self, xrpId) -> None:
+    async def bonusSet(self, xrpId) -> None:
         async with self.asyncSessionMaker() as session:
             async with session.begin():
                 try:
@@ -164,14 +164,14 @@ class XparrotDB:
                         ).where(
                             RewardsTable.xrpId == xrpId
                         ).values(
-                            dailyBonusFlagDate=func.now()
+                            dailyBonusFlagDate = func.now()
                         )
                     )
                     if self.verbose:
-                        print(f"[DB]  dailySet({xrpId}): Success")
+                        print(f"[DB]  bonusSet({xrpId}): Success")
                 except Exception as e:
                     if self.verbose:
-                        print(f"[DB]    dailySet({xrpId}): {e}")
+                        print(f"[DB]    bonusSet({xrpId}): {e}")
                     await session.rollback()
                     
     async def getRandomNFT(self, xrpId) -> str:

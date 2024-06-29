@@ -42,38 +42,38 @@ async def on_ready():
 # Parameters:
 #       XRP ID: [Required] XRP Address where the users hold their NFTs and the receipient of the reward
 @slash_command(
-        name="daily-xrain",
-        description="Redeem daily rewards",
+        name="bonus-xrain",
+        description="Redeem bonus rewards",
         options= [
             slash_str_option(
                 name = "xrpid",
-                description = "XRP Address that will receive the daily reward",
+                description = "XRP Address that will receive the bonus reward",
                 required = True
             )
         ])
-async def dailyXrain(ctx: InteractionContext):
+async def bonusXrain(ctx: InteractionContext):
     await ctx.defer() # Defer the response to wait for the function to run.
     
-    print(f"[BOT]   Daily Claim requested by {ctx.author.display_name}") if botVerbosity else None
+    print(f"[BOT]   Bonus Claim requested by {ctx.author.display_name}") if botVerbosity else None
     
     xrpId = ctx.args[0]
     
-    result = await dbInstance.getDailyStatus(xrpId)
+    result = await dbInstance.getBonusStatus(xrpId)
     
     if result['result'] == 'Claimable':
-        claimInfo = await dbInstance.getDailyAmount(xrpId)
+        claimInfo = await dbInstance.getBonusAmount(xrpId)
         if claimInfo['result'] == "Success":
             claimAmount = claimInfo['amount']
             claimImage = claimInfo['nftLink']
             
-            await dbInstance.dailySet(xrpId)
+            await dbInstance.bonusSet(xrpId)
             
             embed = Embed(title="XRAIN Claim",
-                      description=f"Congratulations {ctx.author.display_name} you have claimed your XRPLRainforest Daily Bonus XRAIN rewards totaling **__{claimAmount}__** XRAIN!!",
+                      description=f"Congratulations {ctx.author.display_name} you have claimed your XRPLRainforest Bonus Bonus XRAIN rewards totaling **__{claimAmount}__** XRAIN!!",
                       timestamp=datetime.now())
 
             embed.set_image(url=claimImage)
-            embed.set_footer(text="XRPLRainforest Daily Bonus")
+            embed.set_footer(text="XRPLRainforest Bonus Bonus")
 
             await ctx.send(embed=embed)
         else:
@@ -84,7 +84,7 @@ async def dailyXrain(ctx: InteractionContext):
         remainingMinute = result['timeRemaining']['minute']
         remainingSecond = result['timeRemaining']['second']
         
-        description = "Your Daily Bonus XRAIN rewards have already been claimed, please wait **__"
+        description = "Your Bonus Bonus XRAIN rewards have already been claimed, please wait **__"
         description += f"{remainingHour}hr" if int(remainingHour) != 0 else ''
         description += f" {remainingMinute}min" if int(remainingMinute) != 0 else ''
         description += f" {remainingSecond}s" if int(remainingSecond) != 0 else ''
@@ -94,7 +94,7 @@ async def dailyXrain(ctx: InteractionContext):
                       description=description,
                       timestamp=datetime.now())
 
-        embed.set_footer(text="XRPLRainforest Daily Bonus")
+        embed.set_footer(text="XRPLRainforest Bonus Bonus")
 
         await ctx.send(embed=embed)
     else:
@@ -110,7 +110,7 @@ async def dailyXrain(ctx: InteractionContext):
         options= [
             slash_str_option(
                 name = "xrpid",
-                description = "XRP Address that will receive the daily reward",
+                description = "XRP Address that will receive the bonus reward",
                 required = True
             )
         ])
