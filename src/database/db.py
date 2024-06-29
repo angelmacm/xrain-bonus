@@ -11,10 +11,9 @@ class XparrotDB:
     def __init__(self, host, dbName, username, password, verbose):
         
         #                   username          if empty, do not add :, else :password      host   dbName
-        sqlLink = f"mysql://{username}{'' if password in ['', None] else f':{password}'}@{host}/{dbName}"
-        dbEngine = create_engine(sqlLink)
-        rewardSession = sessionmaker(bind=dbEngine,expire_on_commit=False)
-        self.rewardsSession = rewardSession()
+        sqlLink = f"mysql+aiomysql://{username}{'' if password in ['', None] else f':{password}'}@{host}/{dbName}"
+        self.dbEngine = create_async_engine(sqlLink, verbose)
+        self.asyncSessionMaker = async_sessionmaker(bind=self.dbEngine, expire_on_commit=False)
         self.vebose = verbose
     
     def getDailyStatus(self, xrpId: str) -> dict:

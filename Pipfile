@@ -10,6 +10,7 @@ configparser = "*"
 mysqlclient = "*"
 sqlalchemy = {extras = ["asyncio"] }
 ipfshttpclient = "*"
+aiomysql = "*"
 
 [dev-packages]
 

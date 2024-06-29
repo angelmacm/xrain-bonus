@@ -1,7 +1,7 @@
 {
     "_meta": {
         "hash": {
-            "sha256": "644dc2d26b9dca6438f62c8d8004e84f137202303e7495ecb550430e0f228587"
+            "sha256": "b7f9c7995c43bb8075d654e600d7168eebb7356ff2ccd156f3eeaeb6f4e234da"
         },
         "pipfile-spec": 6,
         "requires": {
@@ -97,6 +97,15 @@
             ],
             "markers": "python_version >= '3.8'",
             "version": "==3.9.5"
+        },
+        "aiomysql": {
+            "hashes": [
+                "sha256:558b9c26d580d08b8c5fd1be23c5231ce3aeff2dadad989540fee740253deb67",
+                "sha256:b7c26da0daf23a5ec5e0b133c03d20657276e4eae9b73e040b72787f6f6ade0a"
+            ],
+            "index": "pypi",
+            "markers": "python_version >= '3.7'",
+            "version": "==0.2.0"
         },
         "aiosignal": {
             "hashes": [
@@ -261,12 +270,12 @@
         },
         "discord-py-interactions": {
             "hashes": [
-                "sha256:74d6f38310a1b0cd0ec56121fc3835e8c6e9098761417509f5a183d7a7879f57",
-                "sha256:f4562475d5c1b46f87196706d2dee1876ffa4b1ded221aeb49f4a0fc9675ff61"
+                "sha256:98054a323b7ac2ea1b9cbc6e2a4ec5e227e7dc19c5845925e49f6d7b1cc9d16c",
+                "sha256:a40f725b32f34da693f779554c03f158bf0dc184d09b9637def642b872266a44"
             ],
             "index": "pypi",
             "markers": "python_version >= '3.10'",
-            "version": "==5.13.0"
+            "version": "==5.13.1"
         },
         "discord-typings": {
             "hashes": [
@@ -644,6 +653,14 @@
             ],
             "markers": "python_version >= '2.7' and python_version not in '3.0, 3.1, 3.2, 3.3, 3.4'",
             "version": "==3.20.0"
+        },
+        "pymysql": {
+            "hashes": [
+                "sha256:4de15da4c61dc132f4fb9ab763063e693d521a80fd0e87943b9a453dd4c19d6c",
+                "sha256:e127611aaf2b417403c60bf4dc570124aeb4a57f5f37b8e95ae399a42f904cd0"
+            ],
+            "markers": "python_version >= '3.7'",
+            "version": "==1.1.1"
         },
         "python-dateutil": {
             "hashes": [
