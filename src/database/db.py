@@ -56,8 +56,9 @@ class XparrotDB:
                         # compute the remaining time
                         timeDiff:timedelta = nextClaim - currentTime
                         
-                        # Parse the remaining time
-                        remainingHour, remainingMin, remainingSec = str(timeDiff).split(":")
+                        remainingHour = timeDiff.seconds // 3600  + (timeDiff.days * 24)
+                        remainingMin = (timeDiff.seconds // 60) % 60  
+                        remainingSec = timeDiff.seconds % 60
                         
                         # Ready the return structure
                         funcResult["result"] = 'NotReady'
