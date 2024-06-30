@@ -1,10 +1,8 @@
-from sqlalchemy.ext.asyncio import create_async_engine, async_sessionmaker, AsyncSession
-from sqlalchemy import create_engine, and_, or_, update
-from sqlalchemy.orm import sessionmaker
+from sqlalchemy.ext.asyncio import create_async_engine, async_sessionmaker
+from sqlalchemy import update
 from database.models.rewardstable import RewardsTable
 from database.models.nftTraitList import NFTTraitList
 from sqlalchemy.sql import func
-from sqlalchemy.types import DateTime
 from datetime import timedelta, datetime
 from sqlalchemy.future import select
 

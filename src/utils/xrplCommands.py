@@ -3,10 +3,8 @@ from xrpl.wallet import Wallet
 from xrpl.asyncio.account import get_balance
 from xrpl.asyncio.transaction import autofill_and_sign, submit_and_wait
 from xrpl.models.transactions import Payment, Memo
-from xrpl.models.amounts import IssuedCurrencyAmount
 from xrpl.utils import xrp_to_drops
 from xrpl.models.requests.account_lines import AccountLines
-from xrpl.models.requests import RipplePathFind
 from asyncio import sleep
 from configparser import ConfigParser
 
