@@ -33,6 +33,7 @@ botVerbosity = botConfig.getboolean('verbose')
 @listen()
 async def on_ready():
     # Some function to do when the bot is ready
+    await xrplInstance.registerSeed(xrplConfig['seed'])
     print("[BOT]    Discord Bot Ready!")
 
 # Dailies Command:
@@ -63,6 +64,17 @@ async def bonusXrain(ctx: InteractionContext):
             claimAmount = claimInfo['amount']
             claimImage = claimInfo['nftLink']
             tokenId = claimInfo['tokenId']
+            
+            sendSuccess = xrplInstance.sendCoin(address=xrpId,
+                                                  value=int(claimAmount),
+                                                  coinHex=coinsConfig['XRAIN'])
+            
+            if not sendSuccess['result']:
+                embed = Embed(title="XRAIN Claim",
+                              description=f"{sendSuccess['error'] if sendSuccess['error'] is not None else 'Unknown'} error occurred",
+                              timestamp=datetime.now())
+                await ctx.send(embed=embed)
+                return
             
             await dbInstance.bonusSet(xrpId)
             
@@ -133,9 +145,21 @@ async def biweeklyXrain(ctx: InteractionContext):
     
     xrpId = ctx.args[0]
     
-    result = await dbInstance.getBiWeeklyStatus(xrpId)
+    amount = await dbInstance.getBiWeeklyStatus(xrpId)
     
-    if result:
+    if amount:
+        
+        sendSuccess = xrplInstance.sendCoin(address=xrpId,
+                                            value=int(amount),
+                                            coinHex=coinsConfig['XRAIN'])
+        
+        if not sendSuccess['result']:
+            embed = Embed(title="XRAIN Claim",
+                            description=f"{sendSuccess['error'] if sendSuccess['error'] is not None else 'Unknown'} error occurred",
+                            timestamp=datetime.now())
+            await ctx.send(embed=embed)
+            return
+        
         
         await dbInstance.biweeklySet(xrpId)
         nftData = await dbInstance.getRandomNFT(xrpId)

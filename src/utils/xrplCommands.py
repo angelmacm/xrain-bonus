@@ -145,6 +145,7 @@ class XRPClient:
         try:
             print("[XRPL]   Registering Wallet...") if self.verbose else None # For debugging purposes
             self.wallet = Wallet.from_seed(seed)
+            print("[XRPL]   Registering Success!") if self.verbose else None # For debugging purposes
             return {"result":True, "error": "success"}
         except Exception as e:
             print(f"[XRPL]   Error in wallet registration") if self.verbose else None # For debugging purposes
