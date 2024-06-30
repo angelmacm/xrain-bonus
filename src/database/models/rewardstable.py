@@ -6,7 +6,7 @@ from sqlalchemy.ext.declarative import declarative_base
 Base = declarative_base()
 
 class RewardsTable(Base):
-    __tablename__ = 'rewardstable'
+    __tablename__ = 'RewardsTable'
 
     xrpId = Column(VARCHAR, primary_key=True)
     OGReputationRewards = Column(Integer)
