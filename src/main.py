@@ -14,11 +14,8 @@ from asyncio import TimeoutError
 from configparser import ConfigParser
 from datetime import datetime
 
-config = ConfigParser()
-config.read("config.ini", encoding='utf-8')
-
 intents = Intents.DEFAULT | Intents.MESSAGE_CONTENT
-client = Client(intents=intents, token=config['BOT']['token'])
+client = Client(intents=intents, token=botConfig['token'])
 
 # Initialize DB connection
 dbInstance = XparrotDB(
