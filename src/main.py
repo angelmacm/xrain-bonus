@@ -61,7 +61,7 @@ async def bonusXrain(ctx: InteractionContext):
             claimImage = claimInfo['nftLink']
             tokenId = claimInfo['tokenId']
             
-            sendSuccess = xrplInstance.sendCoin(address=xrpId,
+            sendSuccess = await xrplInstance.sendCoin(address=xrpId,
                                                   value=int(claimAmount),
                                                   coinHex=coinsConfig['XRAIN'])
             
@@ -145,7 +145,7 @@ async def biweeklyXrain(ctx: InteractionContext):
     
     if amount:
         
-        sendSuccess = xrplInstance.sendCoin(address=xrpId,
+        sendSuccess = await xrplInstance.sendCoin(address=xrpId,
                                             value=int(amount),
                                             coinHex=coinsConfig['XRAIN'])
         
