@@ -161,7 +161,7 @@ async def biweeklyXrain(ctx: InteractionContext):
         nftLink = nftData['nftLink']
 
         embed = Embed(title="XRAIN Claim",
-                      description=f"Congratulations you have claimed your XRPLRainforest Bonus Bi-weekly XRAIN rewards totaling **__{result}__** XRAINs !!\n\n[View NFT Details](https://xrp.cafe/nft/{tokenId})",
+                      description=f"Congratulations you have claimed your XRPLRainforest Bonus Bi-weekly XRAIN rewards totaling **__{amount}__** XRAINs !!\n\n[View NFT Details](https://xrp.cafe/nft/{tokenId})",
                       timestamp=datetime.now())
 
         embed.set_footer(text="XRPLRainforest Bi-weekly Bonus")
