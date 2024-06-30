@@ -1,6 +1,6 @@
 from database.db import XparrotDB
 from utils.xrplCommands import XRPClient
-from utils.config import botConfig, xrplConfig, dbConfig
+from utils.config import botConfig, xrplConfig, dbConfig, coinsConfig
 from interactions import Intents, Client, listen, InteractionContext # General discord Interactions import
 from interactions import slash_command, slash_attachment_option, slash_str_option, slash_bool_option # Slash command imports
 from interactions import Button, ButtonStyle, Embed # Confirmation Imports
@@ -88,7 +88,7 @@ async def bonusXrain(ctx: InteractionContext):
         remainingMinute = result['timeRemaining']['minute']
         remainingSecond = result['timeRemaining']['second']
         
-        description = "Your Bonus Bonus XRAIN rewards have already been claimed, please wait **__"
+        description = "Your Bonus XRAIN rewards have already been claimed, please wait **__"
         description += f"{remainingHour}hr" if int(remainingHour) != 0 else ''
         description += f" {remainingMinute}min" if int(remainingMinute) != 0 else ''
         description += f" {remainingSecond}s" if int(remainingSecond) != 0 else ''
