@@ -6,6 +6,8 @@ from sqlalchemy.sql import func
 from datetime import timedelta, datetime
 from sqlalchemy.future import select
 
+from utils.logging import loggingInstance
+
 class XparrotDB:
     def __init__(self, host, dbName, username, password, verbose):
         
@@ -34,7 +36,7 @@ class XparrotDB:
             result = await session.execute(query)
             result = result.first()
             
-            print(f"[DB]    Query Result: {result}") if self.verbose else None
+            loggingInstance.info(f"Query Result: {result}") if self.verbose else None
             
             # Check if there are results
             # No result would only mean that xrpId is not found
@@ -64,21 +66,21 @@ class XparrotDB:
                         funcResult['timeRemaining']['minute'] = remainingMin
                         funcResult['timeRemaining']['second'] = remainingSec
                         
-                        print(f"[DB]    getBonusStatus({xrpId}): {funcResult}") if self.verbose else None
+                        loggingInstance.info(f"getBonusStatus({xrpId}): {funcResult}") if self.verbose else None
                         
                         return funcResult
                         
                     else:
                         funcResult["result"] = 'Claimable'
-                        print(f"[DB]    getBonusStatus({xrpId}): {funcResult['result']}") if self.verbose else None
+                        loggingInstance.info(f"getBonusStatus({xrpId}): {funcResult['result']}") if self.verbose else None
                         return funcResult
                 else:
                     funcResult["result"] = 'Claimable'
-                    print(f"[DB]    getBonusStatus({xrpId}): {funcResult['result']}") if self.verbose else None
+                    loggingInstance.info(f"getBonusStatus({xrpId}): {funcResult['result']}") if self.verbose else None
                     return funcResult
             else:
                 funcResult['result'] = "XrpIdNotFound"
-                print(f"[DB]    getBonusStatus({xrpId}): {funcResult['result']}") if self.verbose else None
+                loggingInstance.error(f"getBonusStatus({xrpId}): {funcResult['result']}") if self.verbose else None
                 return funcResult
             
     async def getBonusAmount(self, xrpId: str) -> dict:
@@ -95,23 +97,25 @@ class XparrotDB:
             queryResult = await session.execute(query)
             queryResult = queryResult.first()
             
+            loggingInstance.info(f"Query Result: {queryResult}") if self.verbose else None
+            
             if queryResult:
                 xrainValue, nftLink, tokenId = queryResult
                 
                 if nftLink == "":
                     funcResult['result'] = 'ImageLinkNotFound'
-                    print(f"[DB]    getBonusAmount({xrpId}): {funcResult['result']}") if self.verbose else None
+                    loggingInstance.error(f"getBonusAmount({xrpId}): {funcResult['result']}") if self.verbose else None
                     return funcResult
                 
                 funcResult['result'] = 'Success'
                 funcResult['nftLink'] = nftLink
                 funcResult['amount'] = xrainValue
                 funcResult['tokenId'] = tokenId
-                print(f"[DB]    getBonusAmount({xrpId}): {funcResult['result']}") if self.verbose else None
+                loggingInstance.info(f"getBonusAmount({xrpId}): {funcResult['result']}") if self.verbose else None
                 return funcResult            
             else:
                 funcResult['result'] = "XrpIdNotFound"
-                print(f"[DB]    getBonusAmount({xrpId}): {funcResult['result']}") if self.verbose else None
+                loggingInstance.info(f"    getBonusAmount({xrpId}): {funcResult['result']}") if self.verbose else None
                 return funcResult
     
     async def getBiWeeklyStatus(self, xrpId) -> bool | int:
@@ -128,14 +132,14 @@ class XparrotDB:
                 rewardAmount, bonusFlag, repFlag = queryResult
                 if bonusFlag == 1 or repFlag == 1:
                     
-                    print(f"[DB]    getBiWeeklyStatus({xrpId}): BonusReputationFlagTriggered ") if self.verbose else None
+                    loggingInstance.error(f"getBiWeeklyStatus({xrpId}): BonusReputationFlagTriggered ") if self.verbose else None
                     return False
                 
-                print(f"[DB]    getBiWeeklyStatus({xrpId}): Bi-Weekly reward is {rewardAmount}") if self.verbose else None
+                loggingInstance.info(f"getBiWeeklyStatus({xrpId}): Bi-Weekly reward is {rewardAmount}") if self.verbose else None
                 return rewardAmount
             
             else:
-                print(f"[DB]    getBiWeeklyStatus({xrpId}): XrpIdNotFound") if self.verbose else None
+                loggingInstance.error(f"getBiWeeklyStatus({xrpId}): XrpIdNotFound") if self.verbose else None
                 return False
         
     async def biweeklySet(self, xrpId) -> None:
@@ -146,10 +150,10 @@ class XparrotDB:
                         update(RewardsTable).where(RewardsTable.xrpId == xrpId).values(bonusXrainFlag=1)
                     )
                     if self.verbose:
-                        print(f"[DB]    biweeklySet({xrpId}): Success")
+                        loggingInstance.info(f"biweeklySet({xrpId}): Success")
                 except Exception as e:
                     if self.verbose:
-                        print(f"[DB]    biweeklySet({xrpId}): {e}")
+                        loggingInstance.error(f"biweeklySet({xrpId}): {e}")
                     await session.rollback()
            
     
@@ -167,10 +171,10 @@ class XparrotDB:
                         )
                     )
                     if self.verbose:
-                        print(f"[DB]  bonusSet({xrpId}): Success")
+                        loggingInstance.info(f"bonusSet({xrpId}): Success")
                 except Exception as e:
                     if self.verbose:
-                        print(f"[DB]    bonusSet({xrpId}): {e}")
+                        loggingInstance.error(f"bonusSet({xrpId}): {e}")
                     await session.rollback()
                     
     async def getRandomNFT(self, xrpId) -> dict:
@@ -187,19 +191,19 @@ class XparrotDB:
             queryResult = await session.execute(query)
             queryResult = queryResult.first()
             
-            print(queryResult)
+            loggingInstance.info(f"Query Result: {queryResult}") if self.verbose else None
             
             if queryResult:
                 nftLink, tokenId = queryResult
                 
                 if nftLink == "":
-                    print(f"[DB]    getRandomNFT({xrpId}): NoNFTFound") if self.verbose else None
+                    loggingInstance.error(f"getRandomNFT({xrpId}): NoNFTFound") if self.verbose else None
                     return 'NoNFTFound'
                 
                 funcResult['nftLink'] = nftLink
                 funcResult['tokenId'] = tokenId
-                print(f"[DB]    getRandomNFT({xrpId}): {funcResult}") if self.verbose else None
+                loggingInstance.info(f"getRandomNFT({xrpId}): {funcResult}") if self.verbose else None
                 return funcResult
             
-            print(f"[DB]    getRandomNFT({xrpId}): NoNFTFound") if self.verbose else None
+            loggingInstance.error(f"getRandomNFT({xrpId}): NoNFTFound") if self.verbose else None
             return 'NoNFTFound'
