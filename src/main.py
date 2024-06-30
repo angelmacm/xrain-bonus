@@ -1,6 +1,8 @@
 from database.db import XparrotDB
 from utils.xrplCommands import XRPClient
 from utils.config import botConfig, xrplConfig, dbConfig, coinsConfig
+from utils.logging import loggingInstance
+
 from interactions import Intents, Client, listen, InteractionContext # General discord Interactions import
 from interactions import slash_command, slash_str_option # Slash command imports
 from interactions import Embed
@@ -28,7 +30,7 @@ botVerbosity = botConfig.getboolean('verbose')
 async def on_ready():
     # Some function to do when the bot is ready
     await xrplInstance.registerSeed(xrplConfig['seed'])
-    print("[BOT]    Discord Bot Ready!")
+    loggingInstance.info(f"Discord Bot Ready!")
 
 # Dailies Command:
 # Parameters:
@@ -46,7 +48,7 @@ async def on_ready():
 async def bonusXrain(ctx: InteractionContext):
     await ctx.defer() # Defer the response to wait for the function to run.
     
-    print(f"[BOT]   Bonus Claim requested by {ctx.author.display_name}") if botVerbosity else None
+    loggingInstance.info(f"Bonus Claim requested by {ctx.author.display_name}") if botVerbosity else None
     
     xrpId = ctx.args[0]
     
@@ -133,7 +135,7 @@ async def bonusXrain(ctx: InteractionContext):
         ])
 async def biweeklyXrain(ctx: InteractionContext):
     
-    print(f"[BOT]   Biweekly claim requested by {ctx.author.display_name}") if botVerbosity else None
+    loggingInstance.info(f"Biweekly claim requested by {ctx.author.display_name}") if botVerbosity else None
     
     await ctx.defer() # Defer the response to wait for the function to run.
     
