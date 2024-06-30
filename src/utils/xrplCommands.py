@@ -8,6 +8,8 @@ from xrpl.models.requests.account_lines import AccountLines
 from asyncio import sleep
 from configparser import ConfigParser
 
+from utils.logging import loggingInstance
+
 class XRPClient:
     def __init__(self, config: ConfigParser | None) -> None:
         # Parse the configuration
@@ -30,7 +32,7 @@ class XRPClient:
         if memos:
             memoData = memos.encode('utf-8').hex()
         
-        print("[XRPL]   Preparing payment package...") if self.verbose else None # For debugging purposes
+        loggingInstance.info("Preparing payment package...") if self.verbose else None # For debugging purposes
         try:
             if coinHex.upper() == "XRP":
                 # Use xrp_to_drops if the currency is XRP
@@ -66,7 +68,7 @@ class XRPClient:
             # Retry logic should there be a network problem
             retries = 3
             for attempt in range(retries):
-                print(f"[XRPL]   Attempt #{attempt+1} in sending {value} {coinHex} to {address}") if self.verbose else None # For debugging purposes
+                loggingInstance.info(f"   Attempt #{attempt+1} in sending {value} {coinHex} to {address}") if self.verbose else None # For debugging purposes
                 try:
                     async with AsyncWebsocketClient(self.xrpLink) as client:
                         # Sign the transaction
@@ -76,7 +78,7 @@ class XRPClient:
                         result = await submit_and_wait(transaction=signed_tx, client=client)
                     
                     if result.is_successful():
-                        print("[XRPL]   Success")  if self.verbose else None # For debugging purposes
+                        loggingInstance.info("Success")  if self.verbose else None # For debugging purposes
                         funcResult["result"] = True
                         return funcResult
                     else:
@@ -84,14 +86,14 @@ class XRPClient:
                 except Exception as e:
                     
                     if "noCurrent" in str(e) or "overloaded" in str(e):
-                        print(f"[XRPL]   Attempt {attempt + 1} failed: {e}. Retrying...") if self.verbose else None # For debugging purposes
+                        loggingInstance.info(f"Attempt {attempt + 1} failed: {e}. Retrying...") if self.verbose else None # For debugging purposes
                         await sleep(5)  # Wait before retrying
                     else:
                         raise e
             return False
         
         except Exception as e:
-            print(f"[XRPL]   Error processing {value} {coinHex} for {address}: {str(e)}") if self.verbose else None # For debugging purposes
+            loggingInstance.error(f"Error processing {value} {coinHex} for {address}: {str(e)}") if self.verbose else None # For debugging purposes
             funcResult['result'] = False
             funcResult['error'] = e
             return funcResult
@@ -126,7 +128,7 @@ class XRPClient:
                     return self.lastCoinIssuer
             return
         except Exception as e:
-            print(f"[XRPL]   Error checking trust line for {self.wallet.classic_address}: {str(e)}")
+            loggingInstance.error(f"Error checking trust line for {self.wallet.classic_address}: {str(e)}")
             return 
         
     async def checkBalance(self):
@@ -141,12 +143,12 @@ class XRPClient:
         
     async def registerSeed(self, seed) -> dict:
         try:
-            print("[XRPL]   Registering Wallet...") if self.verbose else None # For debugging purposes
+            loggingInstance.info("Registering Wallet...") if self.verbose else None # For debugging purposes
             self.wallet = Wallet.from_seed(seed)
-            print("[XRPL]   Registering Success!") if self.verbose else None # For debugging purposes
+            loggingInstance.info("Registering Success!") if self.verbose else None # For debugging purposes
             return {"result":True, "error": "success"}
         except Exception as e:
-            print(f"[XRPL]   Error in wallet registration") if self.verbose else None # For debugging purposes
+            loggingInstance.error(f"Error in wallet registration") if self.verbose else None # For debugging purposes
             return {"result":False, "error":e}
     
     def getTestMode(self) -> bool:
