@@ -2,16 +2,10 @@ from database.db import XparrotDB
 from utils.xrplCommands import XRPClient
 from utils.config import botConfig, xrplConfig, dbConfig, coinsConfig
 from interactions import Intents, Client, listen, InteractionContext # General discord Interactions import
-from interactions import slash_command, slash_attachment_option, slash_str_option, slash_bool_option # Slash command imports
-from interactions import Button, ButtonStyle, Embed # Confirmation Imports
-from interactions.api.events import Component
+from interactions import slash_command, slash_str_option # Slash command imports
+from interactions import Embed
 
 # Other imports
-from aiohttp import ClientSession
-from io import StringIO
-from csv import reader as csvReader
-from asyncio import TimeoutError
-from configparser import ConfigParser
 from datetime import datetime
 
 intents = Intents.DEFAULT | Intents.MESSAGE_CONTENT

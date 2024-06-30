@@ -7,9 +7,7 @@ name = "pypi"
 xrpl-py = "*"
 discord-py-interactions = "*"
 configparser = "*"
-mysqlclient = "*"
 sqlalchemy = {extras = ["asyncio"] }
-ipfshttpclient = "*"
 aiomysql = "*"
 
 [dev-packages]
