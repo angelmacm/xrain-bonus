@@ -3,3 +3,4 @@ Lib
 Scripts
 config.ini
 __pycache__
+*.log

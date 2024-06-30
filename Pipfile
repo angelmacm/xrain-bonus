@@ -9,6 +9,7 @@ discord-py-interactions = "*"
 configparser = "*"
 sqlalchemy = {extras = ["asyncio"] }
 aiomysql = "*"
+logging = "*"
 
 [dev-packages]
 
