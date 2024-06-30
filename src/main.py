@@ -74,12 +74,18 @@ async def bonusXrain(ctx: InteractionContext):
                       timestamp=datetime.now())
 
             embed.set_image(url=claimImage)
-            embed.set_footer(text="XRPLRainforest Bonus Bonus")
+            embed.set_footer(text="XRPLRainforest Bonus")
 
             await ctx.send(embed=embed)
         else:
-            pass
-        pass
+            embed = Embed(title="XRAIN Claim",
+                      description=f"{claimInfo['result']} error occurred",
+                      timestamp=datetime.now())
+            
+            embed.set_footer(text="XRPLRainforest Bonus")
+            
+            await ctx.send(embed=embed)
+            
     elif result['result'] == 'NotReady':
         remainingHour = result['timeRemaining']['hour']
         remainingMinute = result['timeRemaining']['minute']
@@ -95,11 +101,18 @@ async def bonusXrain(ctx: InteractionContext):
                       description=description,
                       timestamp=datetime.now())
 
-        embed.set_footer(text="XRPLRainforest Bonus Bonus")
+        embed.set_footer(text="XRPLRainforest Bonus")
 
         await ctx.send(embed=embed)
+        
     else:
-        pass
+        embed = Embed(title="XRAIN Claim",
+                      description=f"{result['result']} error occurred",
+                      timestamp=datetime.now())
+            
+        embed.set_footer(text="XRPLRainforest Bonus")
+        
+        await ctx.send(embed=embed)
 
     
 # Biweekly Command:
@@ -142,6 +155,7 @@ async def biweeklyXrain(ctx: InteractionContext):
             embed.add_image(nftLink)
 
         await ctx.send(embed=embed)
+        
     else:
         embed = Embed(title="XRAIN Claim",
                       description="Bonus Bi-weekly XRAIN rewards has already been claimed or the ReputationalFlag has been triggered for this xrpId",
