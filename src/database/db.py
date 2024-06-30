@@ -14,11 +14,13 @@ class XparrotDB:
         #                   username          if empty, do not add :, else :password      host   dbName
         sqlLink = f"mysql+aiomysql://{username}{'' if password in ['', None] else f':{password}'}@{host}/{dbName}"
         loggingInstance.info(f"DB Link: {sqlLink}")
-        self.dbEngine = create_async_engine(sqlLink, echo=verbose)
+        self.dbEngine = create_async_engine(sqlLink, 
+                                            echo=verbose,
+                                            pool_recycle = 3600,
+                                            pool_pre_ping=True)
+        
         self.asyncSessionMaker = async_sessionmaker(bind=self.dbEngine,
-                                                    expire_on_commit=False,
-                                                    pool_recycle = 3600,
-                                                    pool_pre_ping=True)
+                                                    expire_on_commit=False)
         self.verbose = verbose
     
     async def getBonusStatus(self, xrpId: str) -> dict:
