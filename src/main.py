@@ -63,7 +63,8 @@ async def bonusXrain(ctx: InteractionContext):
             
             sendSuccess = await xrplInstance.sendCoin(address=xrpId,
                                                   value=int(claimAmount),
-                                                  coinHex=coinsConfig['XRAIN'])
+                                                  coinHex=coinsConfig['XRAIN'],
+                                                  memos="XRPLRainforest Bonus Rewards")
             
             if not sendSuccess['result']:
                 embed = Embed(title="XRAIN Claim",
@@ -147,7 +148,8 @@ async def biweeklyXrain(ctx: InteractionContext):
         
         sendSuccess = await xrplInstance.sendCoin(address=xrpId,
                                             value=int(amount),
-                                            coinHex=coinsConfig['XRAIN'])
+                                            coinHex=coinsConfig['XRAIN'],
+                                            memos="XRPLRainforest Bonus Biweekly Reputation Rewards")
         
         if not sendSuccess['result']:
             embed = Embed(title="XRAIN Claim",
