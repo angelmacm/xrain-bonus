@@ -71,11 +71,9 @@ class XRPClient:
                 loggingInstance.info(f"   Attempt #{attempt+1} in sending {value} {coinHex} to {address}") if self.verbose else None # For debugging purposes
                 try:
                     async with AsyncWebsocketClient(self.xrpLink) as client:
-                        # Sign the transaction
-                        signed_tx = await autofill_and_sign(transaction=payment, wallet=self.wallet, client=client)
                         
-                        # Submit the signed transaction to be validated
-                        result = await submit_and_wait(transaction=signed_tx, client=client)
+                        # Autofill, submit and wait the transaction to be validated
+                        result = await submit_and_wait(transaction=payment, client=client, wallet=self.wallet)
                     
                     if result.is_successful():
                         loggingInstance.info("Success")  if self.verbose else None # For debugging purposes
