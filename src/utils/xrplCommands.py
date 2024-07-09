@@ -79,7 +79,7 @@ class XRPClient:
                         
                         autofilledTx = await autofill(transaction=payment, client=client)
                         
-                        loggingInstance.error(f"Autofilled transaction: {autofilledTx.to_dict()}")
+                        loggingInstance.info(f"Autofilled transaction: {autofilledTx.to_dict()}")
                         
                         # Ensure no unsupported fields are present
                         if 'full' in autofilledTx.to_dict().keys():
