@@ -1,4 +1,4 @@
-from xrpl.asyncio.clients import AsyncWebsocketClient
+from xrpl.asyncio.clients import AsyncJsonRpcClient
 from xrpl.wallet import Wallet
 from xrpl.asyncio.account import get_balance, get_next_valid_seq_number
 from xrpl.asyncio.transaction import autofill_and_sign, submit_and_wait, autofill, sign, submit
@@ -76,7 +76,7 @@ class XRPClient:
             for attempt in range(retries):
                 loggingInstance.info(f"   Attempt #{attempt+1} in sending {value} {coinHex} to {address}") if self.verbose else None # For debugging purposes
                 try:
-                    async with AsyncWebsocketClient(self.xrpLink) as client:
+                    async with AsyncJsonRpcClient(self.xrpLink) as client:
                         loggingInstance.info(f"Submitting payment transaction: {payment.to_dict()}") if self.verbose else None
                         
                         autofilledTx = await autofill(transaction=payment, client=client)
@@ -130,7 +130,7 @@ class XRPClient:
             )
             
             # Request the transaction
-            async with AsyncWebsocketClient(self.xrpLink) as client:
+            async with AsyncJsonRpcClient(self.xrpLink) as client:
                 response = await client.request(account_lines)
 
             # Check if the proper key is found in the response
@@ -150,7 +150,7 @@ class XRPClient:
             return 
         
     async def checkBalance(self):
-        async with AsyncWebsocketClient(self.xrpLink) as client:
+        async with AsyncJsonRpcClient(self.xrpLink) as client:
             return await get_balance(self.wallet.address, client)
     
     def setTestMode(self, mode = True) -> None:
