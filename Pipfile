@@ -4,12 +4,12 @@ verify_ssl = true
 name = "pypi"
 
 [packages]
-xrpl-py = "*"
 discord-py-interactions = "*"
 configparser = "*"
 sqlalchemy = {extras = ["asyncio"] }
 aiomysql = "*"
 logging = "*"
+xrpl-py = "*"
 
 [dev-packages]
 
