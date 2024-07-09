@@ -173,18 +173,26 @@ class XRPClient:
     
     async def manual_fill_and_send(self, transaction:Payment, client:AsyncWebsocketClient):
         try:
+            loggingInstance.info(f"Getting current ledger") if self.verbose else None
             # Get the current ledger index
             ledgerResponse = await client.request({"command": "ledger_current"})
             ledgerIndex = ledgerResponse.result["ledger_current_index"]
+            
+            loggingInstance.info(f"Current ledger: {ledgerIndex}") if self.verbose else None
+            loggingInstance.info(f"Getting next valid sequence number") if self.verbose else None
 
             # Get the next valid sequence number
             sequence = await get_next_valid_seq_number(self.wallet.classic_address, client)
+            
+            loggingInstance.info(f"Next valid sequence number: {sequence}") if self.verbose else None
 
             # Manually fill in the required fields
             transaction.fee = "15"  # Set a reasonable fee in drops
             transaction.sequence = sequence
             transaction.last_ledger_sequence = ledgerIndex + 10  # Set last ledger sequence to a few ledgers ahead
 
+            loggingInstance.info(f"Signing Transaction: {transaction.to_dict()}") if self.verbose else None
+            
             # Sign the transaction
             signed_tx = sign(transaction, self.wallet)
             loggingInstance.info(f"Signed transaction: {signed_tx.to_dict()}") if self.verbose else None
