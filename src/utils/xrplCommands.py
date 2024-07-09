@@ -1,7 +1,7 @@
 from xrpl.asyncio.clients import AsyncWebsocketClient
 from xrpl.wallet import Wallet
 from xrpl.asyncio.account import get_balance
-from xrpl.asyncio.transaction import autofill_and_sign, submit_and_wait
+from xrpl.asyncio.transaction import autofill_and_sign, submit_and_wait, autofill
 from xrpl.models.transactions import Payment, Memo
 from xrpl.utils import xrp_to_drops
 from xrpl.models.requests.account_lines import AccountLines
@@ -77,8 +77,15 @@ class XRPClient:
                     async with AsyncWebsocketClient(self.xrpLink) as client:
                         loggingInstance.info(f"Submitting payment transaction: {payment.to_dict()}") if self.verbose else None
                         
+                        autofilledTx = await autofill(transaction=payment, client=client)
+                        
+                        # Ensure no unsupported fields are present
+                        if 'full' in autofilledTx.to_dict():
+                            loggingInstance.error("Found unsupported field 'full' in autofilled transaction")
+                            autofilledTx.to_dict().pop('full')
+                        
                         # Autofill, submit, and wait for the transaction to be validated
-                        result = await submit_and_wait(transaction=payment, client=client, wallet=self.wallet)
+                        result = await submit_and_wait(transaction=autofilledTx, client=client, wallet=self.wallet, autofill=False)
                         
                         loggingInstance.info(f"Transaction result: {result.result}") if self.verbose else None
 
