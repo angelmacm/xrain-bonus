@@ -1,4 +1,4 @@
-from xrpl.asyncio.clients import AsyncJsonRpcClient
+from xrpl.asyncio.clients import AsyncWebsocketClient
 from xrpl.wallet import Wallet
 from xrpl.asyncio.account import get_balance, get_next_valid_seq_number
 from xrpl.asyncio.transaction import autofill_and_sign, submit_and_wait, autofill, sign, submit
@@ -76,22 +76,22 @@ class XRPClient:
             for attempt in range(retries):
                 loggingInstance.info(f"   Attempt #{attempt+1} in sending {value} {coinHex} to {address}") if self.verbose else None # For debugging purposes
                 try:
-                    client = AsyncJsonRpcClient(self.xrpLink)
-                    loggingInstance.info(f"Submitting payment transaction: {payment.to_dict()}") if self.verbose else None
-                    
-                    autofilledTx = await autofill(transaction=payment, client=client)
-                    
-                    loggingInstance.info(f"Autofilled transaction: {autofilledTx.to_dict()}")
-                    
-                    # Ensure no unsupported fields are present
-                    if 'full' in autofilledTx.to_dict().keys():
-                        loggingInstance.error("Found unsupported field 'full' in autofilled transaction")
-                        autofilledTx.to_dict().pop('full')
-                    
-                    # Autofill, submit, and wait for the transaction to be validated
-                    result = await submit_and_wait(transaction=autofilledTx, client=client, wallet=self.wallet, autofill=False)
-                    
-                    loggingInstance.info(f"Transaction result: {result.result}") if self.verbose else None
+                    async with AsyncWebsocketClient(self.xrpLink) as client:
+                        loggingInstance.info(f"Submitting payment transaction: {payment.to_dict()}") if self.verbose else None
+                        
+                        autofilledTx = await autofill(transaction=payment, client=client)
+                        
+                        loggingInstance.info(f"Autofilled transaction: {autofilledTx.to_dict()}")
+                        
+                        # Ensure no unsupported fields are present
+                        if 'full' in autofilledTx.to_dict().keys():
+                            loggingInstance.error("Found unsupported field 'full' in autofilled transaction")
+                            autofilledTx.to_dict().pop('full')
+                        
+                        # Autofill, submit, and wait for the transaction to be validated
+                        result = await submit_and_wait(transaction=autofilledTx, client=client, wallet=self.wallet, autofill=False)
+                        
+                        loggingInstance.info(f"Transaction result: {result.result}") if self.verbose else None
 
                     if result.is_successful():
                         loggingInstance.info("Success") if self.verbose else None
@@ -130,8 +130,8 @@ class XRPClient:
             )
             
             # Request the transaction
-            client = AsyncJsonRpcClient(self.xrpLink)
-            response = await client.request(account_lines)
+            async with AsyncWebsocketClient(self.xrpLink) as client:
+                response = await client.request(account_lines)
 
             # Check if the proper key is found in the response
             if "lines" not in response.result.keys():
@@ -150,8 +150,8 @@ class XRPClient:
             return 
         
     async def checkBalance(self):
-        client = AsyncJsonRpcClient(self.xrpLink)
-        return await get_balance(self.wallet.address, client)
+        async with AsyncWebsocketClient(self.xrpLink) as client:
+            return await get_balance(self.wallet.address, client)
     
     def setTestMode(self, mode = True) -> None:
         if mode:
