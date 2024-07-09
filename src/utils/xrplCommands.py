@@ -44,6 +44,8 @@ class XRPClient:
                     memos= [Memo(memo_data=memoData)] if memos else None
                 )
             else:
+                
+                loggingInstance.info("Checking for trustline...") if self.verbose else None
                 # Get the coin issuer from the trustline that is set on the sender's account
                 coinIssuer = await self.getCoinIssuer(coinHex)
                 
@@ -52,6 +54,8 @@ class XRPClient:
                     funcResult["error"] = "TrustlineNotSetOnSender"
                     funcResult["result"] = False
                     return funcResult
+                
+                loggingInstance.info("Trustline found!...") if self.verbose else None
                 
                 # Prepare the payment transaction format along with the given fields
                 payment = Payment(
@@ -71,23 +75,28 @@ class XRPClient:
                 loggingInstance.info(f"   Attempt #{attempt+1} in sending {value} {coinHex} to {address}") if self.verbose else None # For debugging purposes
                 try:
                     async with AsyncWebsocketClient(self.xrpLink) as client:
+                        loggingInstance.info(f"Submitting payment transaction: {payment.to_dict()}") if self.verbose else None
                         
-                        # Autofill, submit and wait the transaction to be validated
+                        # Autofill, submit, and wait for the transaction to be validated
                         result = await submit_and_wait(transaction=payment, client=client, wallet=self.wallet)
-                    
+                        
+                        loggingInstance.info(f"Transaction result: {result.result}") if self.verbose else None
+
                     if result.is_successful():
-                        loggingInstance.info("Success")  if self.verbose else None # For debugging purposes
+                        loggingInstance.info("Success") if self.verbose else None
                         funcResult["result"] = True
                         return funcResult
                     else:
                         raise Exception(result.result)
                 except Exception as e:
+                    loggingInstance.error(f"Exception in transaction submission: {e}") if self.verbose else None
                     
                     if "noCurrent" in str(e) or "overloaded" in str(e):
-                        loggingInstance.info(f"Attempt {attempt + 1} failed: {e}. Retrying...") if self.verbose else None # For debugging purposes
+                        loggingInstance.info(f"Attempt {attempt + 1} failed: {e}. Retrying...") if self.verbose else None
                         await sleep(5)  # Wait before retrying
                     else:
                         raise e
+
             return False
         
         except Exception as e:
