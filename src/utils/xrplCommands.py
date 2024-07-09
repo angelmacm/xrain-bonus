@@ -2,7 +2,7 @@ from xrpl.asyncio.clients import AsyncWebsocketClient
 from xrpl.wallet import Wallet
 from xrpl.asyncio.account import get_balance, get_next_valid_seq_number
 from xrpl.asyncio.transaction import autofill_and_sign, submit_and_wait, autofill, sign, submit
-from xrpl.asyncio.ledger import get_fee, get_latest_validated_ledger_sequence
+from xrpl.asyncio.ledger import get_fee, get_latest_open_ledger_sequence
 from xrpl.models.transactions import Payment, Memo
 from xrpl.utils import xrp_to_drops
 from xrpl.models.requests.account_lines import AccountLines
@@ -177,7 +177,7 @@ class XRPClient:
             loggingInstance.info(f"Getting current ledger") if self.verbose else None
             # Get the current ledger index
             # ledgerResponse = await client.request({"command": "ledger_current"})
-            ledgerIndex = await get_latest_validated_ledger_sequence(client)
+            ledgerIndex = await get_latest_open_ledger_sequence(client)
             
             loggingInstance.info(f"Current ledger: {ledgerIndex}") if self.verbose else None
             loggingInstance.info(f"Getting next valid sequence number") if self.verbose else None
