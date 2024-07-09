@@ -1,10 +1,11 @@
 from xrpl.asyncio.clients import AsyncWebsocketClient
 from xrpl.wallet import Wallet
-from xrpl.asyncio.account import get_balance
-from xrpl.asyncio.transaction import autofill_and_sign, submit_and_wait, autofill
+from xrpl.asyncio.account import get_balance, get_next_valid_seq_number
+from xrpl.asyncio.transaction import autofill_and_sign, submit_and_wait, autofill, sign, submit
 from xrpl.models.transactions import Payment, Memo
 from xrpl.utils import xrp_to_drops
 from xrpl.models.requests.account_lines import AccountLines
+from xrpl.models.requests import Tx
 from asyncio import sleep
 from configparser import ConfigParser
 
@@ -77,7 +78,7 @@ class XRPClient:
                     async with AsyncWebsocketClient(self.xrpLink) as client:
                         loggingInstance.info(f"Submitting payment transaction: {payment.to_dict()}") if self.verbose else None
                         
-                        autofilledTx = await autofill(transaction=payment, client=client)
+                        autofilledTx = await self.manual_fill_and_send(transaction=payment, client=client)
                         
                         loggingInstance.info(f"Autofilled transaction: {autofilledTx.to_dict()}")
                         
@@ -169,3 +170,42 @@ class XRPClient:
     
     def getTestMode(self) -> bool:
         return self.xrpLink == self.config["testnet_link"]
+    
+    async def manual_fill_and_send(self, transaction:Payment, client:AsyncWebsocketClient):
+        try:
+            # Get the current ledger index
+            ledgerResponse = await client.request({"command": "ledger_current"})
+            ledgerIndex = ledgerResponse.result["ledger_current_index"]
+
+            # Get the next valid sequence number
+            sequence = await get_next_valid_seq_number(self.wallet.classic_address, client)
+
+            # Manually fill in the required fields
+            transaction.fee = "15"  # Set a reasonable fee in drops
+            transaction.sequence = sequence
+            transaction.last_ledger_sequence = ledgerIndex + 10  # Set last ledger sequence to a few ledgers ahead
+
+            # Sign the transaction
+            signed_tx = sign(transaction, self.wallet)
+            loggingInstance.info(f"Signed transaction: {signed_tx.to_dict()}") if self.verbose else None
+
+            # Submit the signed transaction
+            submission_result = await submit(signed_tx, client)
+            loggingInstance.info(f"Submission result: {submission_result}") if self.verbose else None
+
+            # Wait for the final transaction outcome
+            final_result = await self.poll_transaction_status(submission_result["tx_json"]["hash"], client)
+            loggingInstance.info(f"Final transaction outcome: {final_result}") if self.verbose else None
+
+            return final_result
+        except Exception as e:
+            loggingInstance.error(f"Exception in manual_fill_and_send: {e}")
+            raise e
+        
+    async def poll_transaction_status(self, tx_hash, client:AsyncWebsocketClient):
+        for _ in range(10):  # Poll up to 10 times
+            response = await client.request(Tx(transaction=tx_hash))
+            if response.is_successful() and response.result.get("validated"):
+                return response.result
+            await sleep(2)  # Wait for 2 seconds before polling again
+        return {"result": "Transaction not found or not yet validated"}
