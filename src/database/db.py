@@ -219,6 +219,16 @@ class XparrotDB:
         
     async def getClaimQuote(self, taxonId) -> dict:
         async with self.asyncSessionMaker() as session:
+            # Query the rows of taxonId
+            query = select(ClaimQuotes.taxonId).group_by(ClaimQuotes.taxonId)
+            taxonIdList = await session.execute(query)
+            
+            # Get, parse, and put them into a list
+            taxonIdList = [row[0] for row in taxonIdList.all()]
+            
+            # Retain taxonId if it is in the list, else 0
+            taxonId = taxonId if taxonId in taxonIdList else 0
+            
             funcResult = {'nftGroupName':None, 'description':None}
             query = select(
                         ClaimQuotes.nftGroupName, ClaimQuotes.description
@@ -295,4 +305,18 @@ class XparrotDB:
                     if self.verbose:
                         loggingInstance.error(f"setPenaltyStatusClaimed({xrpId}): {e}")
                     await session.rollback()
-        
+
+from asyncio import run
+from utils.config import dbConfig
+
+async def main():
+    dbInstance = XparrotDB(
+        host=dbConfig['db_server'],
+        dbName=dbConfig['db_name'],
+        username=dbConfig['db_username'],
+        password=dbConfig['db_password'],
+        verbose=dbConfig.getboolean('verbose')
+    )
+    print(await dbInstance.getClaimQuote(12))
+    
+run(main())
