@@ -2,6 +2,7 @@ from sqlalchemy.ext.asyncio import create_async_engine, async_sessionmaker
 from sqlalchemy import update
 from database.models.rewardstable import RewardsTable
 from database.models.nftTraitList import NFTTraitList
+from database.models.claimQuotes import ClaimQuotes
 from sqlalchemy.sql import func
 from datetime import timedelta, datetime
 from sqlalchemy.future import select
@@ -213,3 +214,27 @@ class XparrotDB:
             
             loggingInstance.error(f"getRandomNFT({xrpId}): NoNFTFound") if self.verbose else None
             return 'NoNFTFound'
+        
+    async def getClaimQuote(self, taxonId) -> dict:
+        async with self.asyncSessionMaker() as session:
+            funcResult = {'nftGroupName':None, 'description':None}
+            query = select(
+                        ClaimQuotes.nftGroupName, ClaimQuotes.description
+                    ).filter(
+                        ClaimQuotes.taxonId == taxonId,
+                    ).order_by(
+                        func.random()
+                    ).limit(1)
+            queryResult = await session.execute(query)
+            queryResult = queryResult.first()
+            
+            if not queryResult:
+                raise Exception("ClaimQuoteError")
+            
+            nftGroupName, description = queryResult
+            
+            funcResult['description'] = description
+            funcResult['nftGroupName'] = nftGroupName
+            
+            return funcResult
+        
