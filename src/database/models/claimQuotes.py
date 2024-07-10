@@ -8,7 +8,7 @@ Base = declarative_base()
 class ClaimQuotes(Base):
     __tablename__ = 'claimQuotes'
 
-    quoteId = Column(int, index=True)
+    quoteId = Column(Integer, index=True, primary_key=True)
     nftGroupName = column_property(Column('NFTGroupName', VARCHAR))
     taxonId = Column(Integer)
     description = Column(VARCHAR)
