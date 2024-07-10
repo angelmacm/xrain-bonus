@@ -269,4 +269,24 @@ class XparrotDB:
             funcResult['tokenId'] = tokenId
             
             return funcResult
+    
+    async def setPenaltyStatusClaimed(self, xrpId):
+        async with self.asyncSessionMaker() as session:
+            async with session.begin():
+                try:
+                    await session.execute(
+                        update(
+                            RewardsTable
+                        ).where(
+                            RewardsTable.xrpId == xrpId
+                        ).values(
+                            traitXrainFlag = 1
+                        )
+                    )
+                    if self.verbose:
+                        loggingInstance.info(f"setPenaltyStatusClaimed({xrpId}): Success")
+                except Exception as e:
+                    if self.verbose:
+                        loggingInstance.error(f"setPenaltyStatusClaimed({xrpId}): {e}")
+                    await session.rollback()
         
