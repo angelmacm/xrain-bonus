@@ -66,6 +66,13 @@ async def bonusXrain(ctx: InteractionContext):
             claimAmount = claimInfo['amount']
             claimImage = claimInfo['nftLink']
             tokenId = claimInfo['tokenId']
+            taxonId = claimInfo['taxonId']
+            
+            try:
+                message = await dbInstance.getClaimQuote(taxonId)
+            except Exception as e:
+                ctx.send(f"{e} error occurred")
+                return
             
             await xrplInstance.registerSeed(xrplConfig['seed'])
             sendSuccess = await xrplInstance.sendCoin(address=xrpId,
@@ -82,14 +89,19 @@ async def bonusXrain(ctx: InteractionContext):
             
             await dbInstance.bonusSet(xrpId)
             
-            embed = Embed(title="XRAIN Claim",
-                      description=f"Congratulations {ctx.author.display_name} you have claimed your XRPLRainforest Bonus XRAIN rewards totaling **__{claimAmount}__** XRAIN!! Claim again in **__48 Hours__**!\n\n[View NFT Details](https://xrp.cafe/nft/{tokenId})",
-                      timestamp=datetime.now())
+            claimEmbed = Embed(title="XRAIN Claim",
+                      description=f"Congratulations {ctx.author.display_name} you have claimed your XRPLRainforest Bonus XRAIN rewards totaling **__{claimAmount}__** XRAIN!! Claim again in **__48 Hours__**!",
+                      )
+            
+            messageEmbed = Embed(description=f"**{message['description']}**")
+            
+            imageEmbed = Embed(description=f"[View NFT Details](https://xrp.cafe/nft/{tokenId})",
+                               timestamp=datetime.now())
 
-            embed.set_image(url=claimImage)
-            embed.set_footer(text="XRPLRainforest Bonus")
+            imageEmbed.set_image(url=claimImage)
+            imageEmbed.set_footer(text="XRPLRainforest Bonus")
 
-            await ctx.send(embed=embed)
+            await ctx.send(embeds=[claimEmbed, messageEmbed, imageEmbed])
         else:
             embed = Embed(title="XRAIN Claim",
                       description=f"{claimInfo['result']} error occurred",
