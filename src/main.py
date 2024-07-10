@@ -259,6 +259,8 @@ async def biweeklyXrainTraits(ctx: InteractionContext):
             await ctx.send(embed=embed)
             return
         
+        await dbInstance.setPenaltyStatusClaimed(xrpId)
+        
         nftLink = nftInfo['nftLink']
         claimMessage = await dbInstance.getClaimQuote(nftInfo['taxonId'])
 
