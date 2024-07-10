@@ -275,7 +275,7 @@ class XparrotDB:
                 loggingInstance.info(f"getPenaltyStatus({xrpId}): Not ready")
                 return funcResult
             
-            traitReward = traitReward if traitReward < 1 else 1
+            traitReward = traitReward if traitReward > 1 else 1
             
             funcResult['traitReward'] = traitReward
             funcResult['traitXrainFlag'] = traitXrainFlag
