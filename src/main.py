@@ -89,8 +89,10 @@ async def bonusXrain(ctx: InteractionContext):
             
             await dbInstance.bonusSet(xrpId)
             
+            authorName = escapeMarkdown(ctx.author.display_name)
+            
             claimEmbed = Embed(title="XRAIN Claim",
-                      description=f"Congratulations {ctx.author.display_name} you have claimed your XRPLRainforest Bonus XRAIN rewards totaling **__{claimAmount}__** XRAIN!! Claim again in **__48 Hours__**!",
+                      description=f"Congratulations {authorName} you have claimed your XRPLRainforest Bonus XRAIN rewards totaling **__{claimAmount}__** XRAIN!! Claim again in **__48 Hours__**!",
                       )
             
             messageEmbed = Embed(description=f"**{message['description']}**")
@@ -190,10 +192,11 @@ async def biweeklyXrain(ctx: InteractionContext):
         except Exception as e:
             ctx.send(f"{e} error occurred")
             return
-            
+
+        authorName = escapeMarkdown(ctx.author.display_name)            
 
         claimEmbed = Embed(title="XRAIN Claim",
-                      description=f"Congratulations {ctx.author.display_name} you have claimed your XRPLRainforest Bonus Bi-weekly XRAIN Reputation Rewards totaling **__{amount}__** XRAINs!!",
+                      description=f"Congratulations {authorName} you have claimed your XRPLRainforest Bonus Bi-weekly XRAIN Reputation Rewards totaling **__{amount}__** XRAINs!!",
                       )
 
         messageEmbed = Embed(description=f"{message['description']}")
@@ -259,8 +262,10 @@ async def biweeklyXrainTraits(ctx: InteractionContext):
         nftLink = nftInfo['nftLink']
         claimMessage = await dbInstance.getClaimQuote(nftInfo['taxonId'])
 
+        authorName = escapeMarkdown(ctx.author.display_name)
+
         embedClaim = Embed(title="XRAIN Claim",
-                      description=f"Congratulations {ctx.author.display_name} you have claimed your XRPLRainforest Bi-weekly Traits rewards totalling {nftInfo['traitReward']} XRAIN!!",
+                      description=f"Congratulations {authorName} you have claimed your XRPLRainforest Bi-weekly Traits rewards totalling {nftInfo['traitReward']} XRAIN!!",
                         )
         
         embedText = Embed(description=f"**{claimMessage['description']}**")
