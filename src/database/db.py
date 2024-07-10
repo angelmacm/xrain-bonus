@@ -256,13 +256,10 @@ class XparrotDB:
         async with self.asyncSessionMaker() as session:
             funcResult = {'nftLink':None, 'tokenId':None, 'taxonid': None, 'traitXrainFlag': None, 'traitReward': None}
             query = select(
-                        NFTTraitList.nftlink, NFTTraitList.tokenId, NFTTraitList.taxonId, RewardsTable.traitXrainFlag, RewardsTable.penaltyTraits3DRewards
+                        RewardsTable.traitXrainFlag, RewardsTable.penaltyTraits3DRewards
                     ).filter(
-                        NFTTraitList.xrpId == xrpId,
-                        NFTTraitList.nftlink != ''
-                    ).order_by(
-                        func.random()
-                    ).limit(1)
+                        RewardsTable.xrpId == xrpId,
+                    )
             queryResult = await session.execute(query)
             queryResult = queryResult.first()
             
@@ -270,7 +267,7 @@ class XparrotDB:
                 loggingInstance.error(f"getPenaltyStatus({xrpId}): GetPenaltyStatusError")
                 raise Exception("GetPenaltyStatusError")
             
-            nftLink, tokenId, taxonId, traitXrainFlag, traitReward = queryResult
+            traitXrainFlag, traitReward = queryResult
             
             loggingInstance.info(f"getPenaltyStatus({xrpId}): {queryResult}")
             
@@ -281,10 +278,7 @@ class XparrotDB:
             traitReward = traitReward if traitReward < 1 else 1
             
             funcResult['traitReward'] = traitReward
-            funcResult['nftLink'] = nftLink
-            funcResult['taxonId'] = taxonId
             funcResult['traitXrainFlag'] = traitXrainFlag
-            funcResult['tokenId'] = tokenId
             
             loggingInstance.info(f"getPenaltyStatus({xrpId}): Ready, claim {traitReward}")
             

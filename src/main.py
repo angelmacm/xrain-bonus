@@ -240,6 +240,7 @@ async def biweeklyXrainTraits(ctx: InteractionContext):
     
     try:
         nftInfo = await dbInstance.getPenaltyStatus(xrpId)
+        randomNFT = await dbInstance.getRandomNFT(xrpId)
     except Exception as e:
         ctx.send(f"{e} error occurred")
         return
@@ -261,8 +262,8 @@ async def biweeklyXrainTraits(ctx: InteractionContext):
         
         await dbInstance.setPenaltyStatusClaimed(xrpId)
         
-        nftLink = nftInfo['nftLink']
-        claimMessage = await dbInstance.getClaimQuote(nftInfo['taxonId'])
+        nftLink = randomNFT['nftLink']
+        claimMessage = await dbInstance.getClaimQuote(randomNFT['taxonId'])
 
         authorName = escapeMarkdown(ctx.author.display_name)
 
@@ -272,7 +273,7 @@ async def biweeklyXrainTraits(ctx: InteractionContext):
         
         embedText = Embed(description=f"**{claimMessage['description']}**")
 
-        imageEmbed = Embed(description=f"[View NFT Details](https://xrp.cafe/nft/{nftInfo['tokenId']})",
+        imageEmbed = Embed(description=f"[View NFT Details](https://xrp.cafe/nft/{randomNFT['tokenId']})",
                            timestamp=datetime.now())
         imageEmbed.set_footer(text="XRPLRainforest Bi-weekly Traits Bonus")
         
