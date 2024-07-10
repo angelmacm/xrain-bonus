@@ -199,7 +199,7 @@ async def biweeklyXrain(ctx: InteractionContext):
                       description=f"Congratulations {authorName} you have claimed your XRPLRainforest Bonus Bi-weekly XRAIN Reputation Rewards totaling **__{amount}__** XRAINs!!",
                       )
 
-        messageEmbed = Embed(description=f"{message['description']}")
+        messageEmbed = Embed(description=f"**{message['description']}**")
         imageEmbed = Embed(description=f"[View NFT Details](https://xrp.cafe/nft/{tokenId})",
                            timestamp=datetime.now())
         
