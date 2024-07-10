@@ -276,6 +276,8 @@ class XparrotDB:
                 loggingInstance.info(f"getPenaltyStatus({xrpId}): Not ready")
                 return funcResult
             
+            traitReward = traitReward if traitReward < 1 else 1
+            
             funcResult['traitReward'] = traitReward
             funcResult['nftLink'] = nftLink
             funcResult['taxonId'] = taxonId
@@ -291,13 +293,7 @@ class XparrotDB:
             async with session.begin():
                 try:
                     await session.execute(
-                        update(
-                            RewardsTable
-                        ).where(
-                            RewardsTable.xrpId == xrpId
-                        ).values(
-                            traitXrainFlag = 1
-                        )
+                        update(RewardsTable).where(RewardsTable.xrpId == xrpId).values(traitXrainFlag=1)
                     )
                     if self.verbose:
                         loggingInstance.info(f"setPenaltyStatusClaimed({xrpId}): Success")
