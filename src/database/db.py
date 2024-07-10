@@ -92,9 +92,9 @@ class XparrotDB:
             
     async def getBonusAmount(self, xrpId: str) -> dict:
         async with self.asyncSessionMaker() as session:
-            funcResult = {'result':None,'amount':None,'nftLink':None, 'tokenId':None}
+            funcResult = {'result':None,'amount':None,'nftLink':None, 'tokenId':None, 'taxonId': taxonId}
             query = select(
-                NFTTraitList.totalXRAIN, NFTTraitList.nftlink, NFTTraitList.tokenId
+                NFTTraitList.totalXRAIN, NFTTraitList.nftlink, NFTTraitList.tokenId, NFTTraitList.taxonId
             ).filter(
                 NFTTraitList.xrpId == xrpId,
                 NFTTraitList.nftlink != ''
@@ -107,7 +107,7 @@ class XparrotDB:
             loggingInstance.info(f"Query Result: {queryResult}") if self.verbose else None
             
             if queryResult:
-                xrainValue, nftLink, tokenId = queryResult
+                xrainValue, nftLink, tokenId, taxonId = queryResult
                 
                 if nftLink == "":
                     funcResult['result'] = 'ImageLinkNotFound'
@@ -118,6 +118,7 @@ class XparrotDB:
                 funcResult['nftLink'] = nftLink
                 funcResult['amount'] = xrainValue
                 funcResult['tokenId'] = tokenId
+                funcResult['taxonId'] = taxonId
                 loggingInstance.info(f"getBonusAmount({xrpId}): {funcResult['result']}") if self.verbose else None
                 return funcResult            
             else:
@@ -186,9 +187,9 @@ class XparrotDB:
                     
     async def getRandomNFT(self, xrpId) -> dict:
         async with self.asyncSessionMaker() as session:
-            funcResult = {'nftLink':None, 'tokenId':None}
+            funcResult = {'nftLink':None, 'tokenId':None, 'taxonId': None}
             query = select(
-                        NFTTraitList.nftlink, NFTTraitList.tokenId
+                        NFTTraitList.nftlink, NFTTraitList.tokenId, NFTTraitList.taxonId
                     ).filter(
                         NFTTraitList.xrpId == xrpId,
                         NFTTraitList.nftlink != ''
@@ -201,7 +202,7 @@ class XparrotDB:
             loggingInstance.info(f"Query Result: {queryResult}") if self.verbose else None
             
             if queryResult:
-                nftLink, tokenId = queryResult
+                nftLink, tokenId, taxonId = queryResult
                 
                 if nftLink == "":
                     loggingInstance.error(f"getRandomNFT({xrpId}): NoNFTFound") if self.verbose else None
@@ -209,6 +210,7 @@ class XparrotDB:
                 
                 funcResult['nftLink'] = nftLink
                 funcResult['tokenId'] = tokenId
+                funcResult['taxonId'] = taxonId
                 loggingInstance.info(f"getRandomNFT({xrpId}): {funcResult}") if self.verbose else None
                 return funcResult
             
