@@ -81,7 +81,7 @@ async def bonusXrain(ctx: InteractionContext):
                                                   memos="XRPLRainforest Bonus Rewards")
             
             if not sendSuccess['result']:
-                if 'tecPATH_DRY' in sendSuccess['error']:
+                if 'tecPATH_DRY' == str(sendSuccess['error']):
                     embed = Embed(title="XRAIN Claim",
                                     description=f"Please setup XRAIN trustline to claim rewards",
                                     timestamp=datetime.now())    
@@ -179,7 +179,7 @@ async def biweeklyXrain(ctx: InteractionContext):
                                             memos="XRPLRainforest Bonus Biweekly Reputation Rewards")
         
         if not sendSuccess['result']:
-            if 'tecPATH_DRY' in sendSuccess['error']:
+            if 'tecPATH_DRY' == str(sendSuccess['error']):
                 embed = Embed(title="XRAIN Claim",
                                 description=f"Please setup XRAIN trustline to claim rewards",
                                 timestamp=datetime.now())    
@@ -264,7 +264,7 @@ async def biweeklyXrainTraits(ctx: InteractionContext):
                                             memos="XRPLRainforest Bonus Biweekly Trait Rewards")
         
         if not sendSuccess['result']:
-            if 'tecPATH_DRY' in sendSuccess['error']:
+            if 'tecPATH_DRY' == str(sendSuccess['error']):
                 embed = Embed(title="XRAIN Claim",
                                 description=f"Please setup XRAIN trustline to claim rewards",
                                 timestamp=datetime.now())    
