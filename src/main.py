@@ -191,8 +191,14 @@ async def biweeklyXrain(ctx: InteractionContext):
             return
         
         
-        await dbInstance.biweeklySet(xrpId)
         nftData = await dbInstance.getRandomNFT(xrpId)
+        
+        if nftData == 'NoNFTFound':
+            ctx.send("This xrpID has no XRPLRainforest NFTs")
+            return
+        
+        await dbInstance.biweeklySet(xrpId)
+        
         tokenId = nftData['tokenId']
         nftLink = nftData['nftLink']
         taxonId = nftData['taxonId']
@@ -251,6 +257,8 @@ async def biweeklyXrainTraits(ctx: InteractionContext):
     try:
         nftInfo = await dbInstance.getPenaltyStatus(xrpId)
         randomNFT = await dbInstance.getRandomNFT(xrpId)
+        if randomNFT == 'NoNFTFound':
+            raise Exception("NoNFTFound")
     except Exception as e:
         ctx.send(f"{e} error occurred")
         return
