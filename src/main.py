@@ -26,6 +26,12 @@ xrplInstance = XRPClient(xrplConfig)
 
 botVerbosity = botConfig.getboolean('verbose')
 
+def escapeMarkdown(text: str) -> str:
+    escapeChars = ['*', '_', '~', '`']
+    for char in escapeChars:
+        text = text.replace(char, f'\\{char}')
+    return text
+
 @listen()
 async def on_ready():
     # Some function to do when the bot is ready
