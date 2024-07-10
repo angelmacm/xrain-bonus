@@ -81,9 +81,14 @@ async def bonusXrain(ctx: InteractionContext):
                                                   memos="XRPLRainforest Bonus Rewards")
             
             if not sendSuccess['result']:
-                embed = Embed(title="XRAIN Claim",
-                              description=f"{sendSuccess['error'] if sendSuccess['error'] is not None else 'Unknown'} error occurred",
-                              timestamp=datetime.now())
+                if 'tecPATH_DRY' in sendSuccess['error']:
+                    embed = Embed(title="XRAIN Claim",
+                                    description=f"Please setup XRAIN trustline to claim rewards",
+                                    timestamp=datetime.now())    
+                else:
+                    embed = Embed(title="XRAIN Claim",
+                                    description=f"{sendSuccess['error'] if sendSuccess['error'] is not None else 'Unknown'} error occurred",
+                                    timestamp=datetime.now())
                 await ctx.send(embed=embed)
                 return
             
@@ -174,9 +179,14 @@ async def biweeklyXrain(ctx: InteractionContext):
                                             memos="XRPLRainforest Bonus Biweekly Reputation Rewards")
         
         if not sendSuccess['result']:
-            embed = Embed(title="XRAIN Claim",
-                            description=f"{sendSuccess['error'] if sendSuccess['error'] is not None else 'Unknown'} error occurred",
-                            timestamp=datetime.now())
+            if 'tecPATH_DRY' in sendSuccess['error']:
+                embed = Embed(title="XRAIN Claim",
+                                description=f"Please setup XRAIN trustline to claim rewards",
+                                timestamp=datetime.now())    
+            else:
+                embed = Embed(title="XRAIN Claim",
+                                description=f"{sendSuccess['error'] if sendSuccess['error'] is not None else 'Unknown'} error occurred",
+                                timestamp=datetime.now())
             await ctx.send(embed=embed)
             return
         
@@ -254,9 +264,14 @@ async def biweeklyXrainTraits(ctx: InteractionContext):
                                             memos="XRPLRainforest Bonus Biweekly Trait Rewards")
         
         if not sendSuccess['result']:
-            embed = Embed(title="XRAIN Claim",
-                            description=f"{sendSuccess['error'] if sendSuccess['error'] is not None else 'Unknown'} error occurred",
-                            timestamp=datetime.now())
+            if 'tecPATH_DRY' in sendSuccess['error']:
+                embed = Embed(title="XRAIN Claim",
+                                description=f"Please setup XRAIN trustline to claim rewards",
+                                timestamp=datetime.now())    
+            else:
+                embed = Embed(title="XRAIN Claim",
+                                description=f"{sendSuccess['error'] if sendSuccess['error'] is not None else 'Unknown'} error occurred",
+                                timestamp=datetime.now())
             await ctx.send(embed=embed)
             return
         
