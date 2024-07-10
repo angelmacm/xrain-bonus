@@ -231,6 +231,7 @@ class XparrotDB:
             queryResult = queryResult.first()
             
             if not queryResult:
+                loggingInstance.error(f"getClaimQuote({taxonId}): ClaimQuoteError")
                 raise Exception("ClaimQuoteError")
             
             nftGroupName, description = queryResult
@@ -238,6 +239,7 @@ class XparrotDB:
             funcResult['description'] = description
             funcResult['nftGroupName'] = nftGroupName
             
+            loggingInstance.info(f"getClaimQuote({taxonId}): {description}")
             return funcResult
     
     async def getPenaltyStatus(self, xrpId):
@@ -255,11 +257,13 @@ class XparrotDB:
             queryResult = queryResult.first()
             
             if not queryResult:
+                loggingInstance.error(f"getPenaltyStatus({xrpId}): GetPenaltyStatusError")
                 raise Exception("GetPenaltyStatusError")
             
             nftLink, tokenId, taxonId, traitXrainFlag, traitReward = queryResult
             
             if traitXrainFlag:
+                loggingInstance.info(f"getPenaltyStatus({xrpId}): Not ready")
                 return funcResult
             
             funcResult['traitReward'] = traitReward
@@ -267,6 +271,8 @@ class XparrotDB:
             funcResult['taxonId'] = taxonId
             funcResult['traitXrainFlag'] = traitXrainFlag
             funcResult['tokenId'] = tokenId
+            
+            loggingInstance.info(f"getPenaltyStatus({xrpId}): Ready, claim {traitReward}")
             
             return funcResult
     
