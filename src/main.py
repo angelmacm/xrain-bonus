@@ -83,7 +83,7 @@ async def bonusXrain(ctx: InteractionContext):
             if not sendSuccess['result']:
                 if 'tecPATH_DRY' in str(sendSuccess['error']):
                     embed = Embed(title="XRAIN Claim",
-                                    description=f"Please setup XRAIN trustline to claim rewards",
+                                    description=f"Please setup XRAIN trustline to claim rewards by clicking this [link](https://xrpl.services/?issuer=rh3tLHbXwZsp7eciw2Qp8g7bN9RnyGa2pF&currency=585241494E000000000000000000000000000000&limit=21000000)",
                                     timestamp=datetime.now())    
                 else:
                     embed = Embed(title="XRAIN Claim",
@@ -181,7 +181,7 @@ async def biweeklyXrain(ctx: InteractionContext):
         if not sendSuccess['result']:
             if 'tecPATH_DRY' in str(sendSuccess['error']):
                 embed = Embed(title="XRAIN Claim",
-                                description=f"Please setup XRAIN trustline to claim rewards",
+                                description=f"Please setup XRAIN trustline to claim rewards by clicking this [link](https://xrpl.services/?issuer=rh3tLHbXwZsp7eciw2Qp8g7bN9RnyGa2pF&currency=585241494E000000000000000000000000000000&limit=21000000)",
                                 timestamp=datetime.now())    
             else:
                 embed = Embed(title="XRAIN Claim",
@@ -274,7 +274,7 @@ async def biweeklyXrainTraits(ctx: InteractionContext):
         if not sendSuccess['result']:
             if 'tecPATH_DRY' in str(sendSuccess['error']):
                 embed = Embed(title="XRAIN Claim",
-                                description=f"Please setup XRAIN trustline to claim rewards",
+                                description=f"Please setup XRAIN trustline to claim rewards by clicking this [link](https://xrpl.services/?issuer=rh3tLHbXwZsp7eciw2Qp8g7bN9RnyGa2pF&currency=585241494E000000000000000000000000000000&limit=21000000)",
                                 timestamp=datetime.now())    
             else:
                 embed = Embed(title="XRAIN Claim",
