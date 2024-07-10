@@ -92,7 +92,7 @@ class XparrotDB:
             
     async def getBonusAmount(self, xrpId: str) -> dict:
         async with self.asyncSessionMaker() as session:
-            funcResult = {'result':None,'amount':None,'nftLink':None, 'tokenId':None, 'taxonId': taxonId}
+            funcResult = {'result':None,'amount':None,'nftLink':None, 'tokenId':None, 'taxonId': None}
             query = select(
                 NFTTraitList.totalXRAIN, NFTTraitList.nftlink, NFTTraitList.tokenId, NFTTraitList.taxonId
             ).filter(
