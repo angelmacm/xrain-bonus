@@ -305,18 +305,4 @@ class XparrotDB:
                     if self.verbose:
                         loggingInstance.error(f"setPenaltyStatusClaimed({xrpId}): {e}")
                     await session.rollback()
-
-from asyncio import run
-from utils.config import dbConfig
-
-async def main():
-    dbInstance = XparrotDB(
-        host=dbConfig['db_server'],
-        dbName=dbConfig['db_name'],
-        username=dbConfig['db_username'],
-        password=dbConfig['db_password'],
-        verbose=dbConfig.getboolean('verbose')
-    )
-    print(await dbInstance.getClaimQuote(12))
-    
-run(main())
+                    
