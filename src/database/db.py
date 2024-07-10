@@ -239,4 +239,34 @@ class XparrotDB:
             funcResult['nftGroupName'] = nftGroupName
             
             return funcResult
+    
+    async def getPenaltyStatus(self, xrpId):
+        async with self.asyncSessionMaker() as session:
+            funcResult = {'nftLink':None, 'tokenId':None, 'taxonid': None, 'traitXrainFlag': None, 'traitReward': None}
+            query = select(
+                        NFTTraitList.nftlink, NFTTraitList.tokenId, NFTTraitList.taxonId, RewardsTable.traitXrainFlag, RewardsTable.penaltyTraits3DRewards
+                    ).filter(
+                        NFTTraitList.xrpId == xrpId,
+                        NFTTraitList.nftlink != ''
+                    ).order_by(
+                        func.random()
+                    ).limit(1)
+            queryResult = await session.execute(query)
+            queryResult = queryResult.first()
+            
+            if not queryResult:
+                raise Exception("GetPenaltyStatusError")
+            
+            nftLink, tokenId, taxonId, traitXrainFlag, traitReward = queryResult
+            
+            if traitXrainFlag:
+                return funcResult
+            
+            funcResult['traitReward'] = traitReward
+            funcResult['nftLink'] = nftLink
+            funcResult['taxonId'] = taxonId
+            funcResult['traitXrainFlag'] = traitXrainFlag
+            funcResult['tokenId'] = tokenId
+            
+            return funcResult
         
