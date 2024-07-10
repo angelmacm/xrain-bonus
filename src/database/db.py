@@ -272,7 +272,9 @@ class XparrotDB:
             
             nftLink, tokenId, taxonId, traitXrainFlag, traitReward = queryResult
             
-            if traitXrainFlag:
+            loggingInstance.info(f"getPenaltyStatus({xrpId}): {queryResult}")
+            
+            if traitXrainFlag == 1:
                 loggingInstance.info(f"getPenaltyStatus({xrpId}): Not ready")
                 return funcResult
             
