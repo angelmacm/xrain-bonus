@@ -228,7 +228,7 @@ async def biweeklyXrain(ctx: InteractionContext):
         
     else:
         embed = Embed(title="XRAIN Claim",
-                      description="Bonus Bi-weekly XRAIN rewards has already been claimed or the ReputationalFlag has been triggered for this xrpId",
+                      description="Bonus Bi-weekly XRAIN Reputation Rewards has already been claimed or the ReputationalFlag has been triggered for this xrpId",
                       timestamp=datetime.now())
         
         embed.set_footer(text="XRPLRainforest Bi-weekly Bonus")
