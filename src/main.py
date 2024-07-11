@@ -100,15 +100,15 @@ async def bonusXrain(ctx: InteractionContext):
                       description=f"Congratulations {authorName} you have claimed your XRPLRainforest Bonus XRAIN rewards totaling **__{claimAmount}__** XRAIN!! Claim again in **__48 Hours__**!",
                       )
             
-            messageEmbed = Embed(description=f"**{message['description']}**")
+            messageEmbed = Embed(description=f"**{message['description']}**",
+                                 timestamp=datetime.now())
+            messageEmbed.set_footer(text="XRPLRainforest Bonus")
             
-            imageEmbed = Embed(description=f"[View NFT Details](https://xrp.cafe/nft/{tokenId})",
-                               timestamp=datetime.now())
+            imageEmbed = Embed(description=f"[View NFT Details](https://xrp.cafe/nft/{tokenId})")
 
             imageEmbed.set_image(url=claimImage)
-            imageEmbed.set_footer(text="XRPLRainforest Bonus")
 
-            await ctx.send(embeds=[claimEmbed, messageEmbed, imageEmbed])
+            await ctx.send(embeds=[claimEmbed, imageEmbed, messageEmbed])
         else:
             embed = Embed(title="XRAIN Claim",
                       description=f"{claimInfo['result']} error occurred",
@@ -215,16 +215,17 @@ async def biweeklyXrain(ctx: InteractionContext):
                       description=f"Congratulations {authorName} you have claimed your XRPLRainforest Bonus Bi-weekly XRAIN Reputation Rewards totaling **__{amount}__** XRAINs!!",
                       )
 
-        messageEmbed = Embed(description=f"**{message['description']}**")
-        imageEmbed = Embed(description=f"[View NFT Details](https://xrp.cafe/nft/{tokenId})",
-                           timestamp=datetime.now())
+        messageEmbed = Embed(description=f"**{message['description']}**",
+                             timestamp=datetime.now())
+        messageEmbed.set_footer(text="XRPLRainforest Bi-weekly Bonus")
+
+        imageEmbed = Embed(description=f"[View NFT Details](https://xrp.cafe/nft/{tokenId})")
         
-        imageEmbed.set_footer(text="XRPLRainforest Bi-weekly Bonus")
         
         if nftLink != "NoNFTFound":
             imageEmbed.add_image(nftLink)
 
-        await ctx.send(embeds=[claimEmbed, messageEmbed, imageEmbed])
+        await ctx.send(embeds=[claimEmbed, imageEmbed, messageEmbed])
         
     else:
         embed = Embed(title="XRAIN Claim",
@@ -294,16 +295,16 @@ async def biweeklyXrainTraits(ctx: InteractionContext):
                       description=f"Congratulations {authorName} you have claimed your XRPLRainforest Bi-weekly Traits rewards totalling {nftInfo['traitReward']} XRAIN!!",
                         )
         
-        embedText = Embed(description=f"**{claimMessage['description']}**")
+        embedText = Embed(description=f"**{claimMessage['description']}**",
+                          timestamp=datetime.now())
+        embedText.set_footer(text="XRPLRainforest Bi-weekly Traits Bonus")
 
-        imageEmbed = Embed(description=f"[View NFT Details](https://xrp.cafe/nft/{randomNFT['tokenId']})",
-                           timestamp=datetime.now())
-        imageEmbed.set_footer(text="XRPLRainforest Bi-weekly Traits Bonus")
+        imageEmbed = Embed(description=f"[View NFT Details](https://xrp.cafe/nft/{randomNFT['tokenId']})")
         
         if nftLink != "NoNFTFound":
             imageEmbed.add_image(nftLink)
 
-        await ctx.send(embeds=[embedClaim,embedText,imageEmbed])
+        await ctx.send(embeds=[embedClaim,imageEmbed, embedText])
         
     else:
         embed = Embed(title="XRAIN Claim",
