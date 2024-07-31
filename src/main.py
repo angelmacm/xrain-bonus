@@ -123,7 +123,7 @@ async def bonusXrain(ctx: InteractionContext):
             authorName = escapeMarkdown(ctx.author.display_name)
             
             claimEmbed = Embed(title="XRAIN Claim",
-                      description=f"Congratulations {authorName} you have claimed your XRPLRainforest Bonus XRAIN rewards totaling **__{claimAmount}__** XRAIN!! Claim again in **__48 Hours__**!",
+                      description=f"Congratulations {authorName} you have claimed your XRPLRainforest Bonus XRAIN rewards totaling **__{claimAmount}__** XRAIN!! Claim again in **__24 Hours__**!",
                       )
             
             messageEmbed = Embed(description=f"**{message['description']}**",
