@@ -17,7 +17,11 @@ class XparrotDB:
         sqlLink = f"mysql+aiomysql://{username}{'' if password in ['', None] else f':{password}'}@{host}/{dbName}"
         loggingInstance.info(f"DB Link: {sqlLink}")
         self.dbEngine = create_async_engine(
-            sqlLink, echo=verbose, pool_recycle=3600, pool_pre_ping=True
+            sqlLink,
+            echo=verbose,
+            pool_recycle=600,
+            pool_pre_ping=True,
+            pool_use_lifo=True,
         )
 
         self.asyncSessionMaker = async_sessionmaker(
