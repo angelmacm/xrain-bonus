@@ -325,8 +325,8 @@ async def biweeklyXrain(ctx: InteractionContext):
 
 
 @slash_command(
-    name="biweekly-xrain-traits",
-    description="Redeem bi-weekly traits rewards",
+    name="daily-xrain-traits",
+    description="Redeem daily traits rewards",
     options=[
         slash_str_option(
             name="xrpid",
@@ -357,7 +357,7 @@ async def biweeklyXrainTraits(ctx: InteractionContext):
     xrpId = ctx.args[0]
 
     try:
-        nftInfo = await dbInstance.getPenaltyStatus(xrpId)
+        result = await dbInstance.getPenaltyStatus(xrpId)
         randomNFT = await dbInstance.getRandomNFT(xrpId)
         if randomNFT == "NoNFTFound":
             raise Exception("NoNFTFound")
@@ -365,54 +365,48 @@ async def biweeklyXrainTraits(ctx: InteractionContext):
         ctx.send(f"{e} error occurred")
         return
 
-    if nftInfo["traitXrainFlag"] is not None:
+    claimable = await checkStatus(result, ctx)
 
-        sendSuccess = await sendCoin(
-            address=xrpId,
-            value=nftInfo["traitReward"],
-            memos="XRPLRainforest Bonus Biweekly Trait Rewards",
-            ctx=ctx,
-        )
+    if not claimable:
+        return
 
-        if not sendSuccess:
-            return
+    amount = precision(result["amount"] / 14)
 
-        await dbInstance.setPenaltyStatusClaimed(xrpId)
+    sendSuccess = await sendCoin(
+        address=xrpId,
+        value=amount,
+        memos="XRPLRainforest Bonus Biweekly Trait Rewards",
+        ctx=ctx,
+    )
 
-        nftLink = randomNFT["nftLink"]
-        claimMessage = await dbInstance.getClaimQuote(randomNFT["taxonId"])
+    if not sendSuccess:
+        return
 
-        authorName = escapeMarkdown(ctx.author.display_name)
+    await dbInstance.setPenaltyStatusClaimed(xrpId)
 
-        embedClaim = Embed(
-            title="XRAIN Claim",
-            description=f"Congratulations {authorName} you have claimed your XRPLRainforest Bi-weekly Traits rewards totalling {nftInfo['traitReward']} XRAIN!!",
-        )
+    nftLink = randomNFT["nftLink"]
+    claimMessage = await dbInstance.getClaimQuote(randomNFT["taxonId"])
 
-        embedText = Embed(
-            description=f"**{claimMessage['description']}**", timestamp=datetime.now()
-        )
-        embedText.set_footer(text="XRPLRainforest Bi-weekly Traits Bonus")
+    authorName = escapeMarkdown(ctx.author.display_name)
 
-        imageEmbed = Embed(
-            description=f"[View NFT Details](https://xrp.cafe/nft/{randomNFT['tokenId']})"
-        )
+    embedClaim = Embed(
+        title="XRAIN Claim",
+        description=f"Congratulations {authorName} you have claimed your XRPLRainforest Daily Traits rewards totalling {amount} XRAIN!!",
+    )
 
-        if nftLink != "NoNFTFound":
-            imageEmbed.add_image(nftLink)
+    embedText = Embed(
+        description=f"**{claimMessage['description']}**", timestamp=datetime.now()
+    )
+    embedText.set_footer(text="XRPLRainforest Bi-weekly Traits Bonus")
 
-        await ctx.send(embeds=[embedClaim, imageEmbed, embedText])
+    imageEmbed = Embed(
+        description=f"[View NFT Details](https://xrp.cafe/nft/{randomNFT['tokenId']})"
+    )
 
-    else:
-        embed = Embed(
-            title="XRAIN Claim",
-            description="Bi-weekly Traits XRAIN rewards has already been claimed",
-            timestamp=datetime.now(),
-        )
+    if nftLink != "NoNFTFound":
+        imageEmbed.add_image(nftLink)
 
-        embed.set_footer(text="XRPLRainforest Bi-weekly Bonus")
-
-        await ctx.send(embed=embed)
+    await ctx.send(embeds=[embedClaim, imageEmbed, embedText])
 
 
 if __name__ == "__main__":

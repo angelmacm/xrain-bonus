@@ -306,44 +306,30 @@ class XparrotDB:
             return funcResult
 
     async def getPenaltyStatus(self, xrpId):
+        funcResult = {
+            "result": "",
+            "timeRemaining": {
+                "hour": 0,
+                "minute": 0,
+                "second": 0,
+            },
+        }
+
         async with self.asyncSessionMaker() as session:
-            funcResult = {
-                "nftLink": None,
-                "tokenId": None,
-                "taxonid": None,
-                "traitXrainFlag": None,
-                "traitReward": None,
-            }
             query = select(
-                RewardsTable.traitXrainFlag, RewardsTable.penaltyTraits3DRewards
-            ).filter(
-                RewardsTable.xrpId == xrpId,
-            )
+                RewardsTable.dailyTraitFlagDate,
+                func.now(),
+                RewardsTable.penaltyTraits3DRewards,
+            ).filter(RewardsTable.xrpId == xrpId)
             queryResult = await session.execute(query)
             queryResult = queryResult.first()
 
-            if not queryResult:
-                loggingInstance.error(
-                    f"getPenaltyStatus({xrpId}): GetPenaltyStatusError"
-                )
-                raise Exception("GetPenaltyStatusError")
+            funcResult = self.check_cooldown(queryResult, funcResult)
 
-            traitXrainFlag, traitReward = queryResult
+            if queryResult:
+                funcResult["amount"] = queryResult[3]
 
-            loggingInstance.info(f"getPenaltyStatus({xrpId}): {queryResult}")
-
-            if traitXrainFlag == 1:
-                loggingInstance.info(f"getPenaltyStatus({xrpId}): Not ready")
-                return funcResult
-
-            traitReward = traitReward if traitReward > 1 else 1
-
-            funcResult["traitReward"] = traitReward
-            funcResult["traitXrainFlag"] = traitXrainFlag
-
-            loggingInstance.info(
-                f"getPenaltyStatus({xrpId}): Ready, claim {traitReward}"
-            )
+            loggingInstance.info(f"getBonusStatus({xrpId}): {funcResult['result']}")
 
             return funcResult
 
@@ -354,7 +340,7 @@ class XparrotDB:
                     await session.execute(
                         update(RewardsTable)
                         .where(RewardsTable.xrpId == xrpId)
-                        .values(traitXrainFlag=1)
+                        .values(dailyTraitFlagDate=func.now())
                     )
                     if self.verbose:
                         loggingInstance.info(
