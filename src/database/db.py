@@ -185,7 +185,7 @@ class XparrotDB:
             funcResult = self.check_cooldown(queryResult, funcResult)
 
             if queryResult:
-                funcResult["amount"] = queryResult[3]
+                x, y, funcResult["amount"] = queryResult
 
             loggingInstance.info(f"getBonusStatus({xrpId}): {funcResult['result']}")
 
@@ -327,7 +327,7 @@ class XparrotDB:
             funcResult = self.check_cooldown(queryResult, funcResult)
 
             if queryResult:
-                funcResult["amount"] = queryResult[3]
+                x, y, funcResult["amount"] = queryResult
 
             loggingInstance.info(f"getBonusStatus({xrpId}): {funcResult['result']}")
 
