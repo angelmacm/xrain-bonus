@@ -34,3 +34,5 @@ class RewardsTable(Base):
     nftGroupName = column_property(Column("NFTGroupName", Integer))
     taxonId = Column(Integer)
     discordId = Column(VARCHAR)
+    dailyTraitFlagDate = Column(DateTime)
+    dailyRepFlagDate = Column(DateTime)
