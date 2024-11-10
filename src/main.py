@@ -158,7 +158,7 @@ async def on_ready():
 async def bonusXrain(ctx: InteractionContext):
     await ctx.defer()  # Defer the response to wait for the function to run.
 
-    if is_on_cooldown(ctx):
+    if await is_on_cooldown(ctx):
         return
 
     (
@@ -256,7 +256,7 @@ async def biweeklyXrain(ctx: InteractionContext):
 
     await ctx.defer()  # Defer the response to wait for the function to run.
 
-    if is_on_cooldown(ctx):
+    if await is_on_cooldown(ctx):
         return
 
     xrpId = ctx.args[0]
@@ -343,7 +343,7 @@ async def biweeklyXrainTraits(ctx: InteractionContext):
 
     await ctx.defer()  # Defer the response to wait for the function to run.
 
-    if is_on_cooldown(ctx):
+    if await is_on_cooldown(ctx):
         return
 
     xrpId = ctx.args[0]
