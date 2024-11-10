@@ -116,10 +116,12 @@ async def checkStatus(result, ctx, rewardName):
             title="XRAIN Claim", description=description, timestamp=datetime.now()
         )
 
-        embed.set_footer(text="XRPLRainforest Bonus")
-
-        await ctx.send(embed=embed)
-
+    elif result["result"] == "XrpIdNotFound":
+        embed = Embed(
+            title="XRAIN Claim",
+            description=f"XRP Address not found in our database, please open a support ticket for assistance",
+            timestamp=datetime.now(),
+        )
     else:
         embed = Embed(
             title="XRAIN Claim",
@@ -127,9 +129,8 @@ async def checkStatus(result, ctx, rewardName):
             timestamp=datetime.now(),
         )
 
-        embed.set_footer(text="XRPLRainforest Bonus")
-
-        await ctx.send(embed=embed)
+    embed.set_footer(text="XRPLRainforest Bonus")
+    await ctx.send(embed=embed)
 
     return False
 
