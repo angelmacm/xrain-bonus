@@ -29,6 +29,43 @@ class XparrotDB:
         )
         self.verbose = verbose
 
+    def check_cooldown(self, result, funcResult):
+        if result:
+            lastClaim, currentTime = result
+
+            if lastClaim and not lastClaim == "0000-00-00 00:00:00":
+                lastClaim = (
+                    datetime.strptime(lastClaim, "%Y-%m-%d %H:%M:%S")
+                    if type(lastClaim) == str
+                    else lastClaim
+                )
+                nextClaim = lastClaim + timedelta(days=1)
+
+                # Check if the currentTime is past than nextClaim
+                if nextClaim > currentTime:
+
+                    # compute the remaining time
+                    timeDiff: timedelta = nextClaim - currentTime
+
+                    remainingHour = timeDiff.seconds // 3600 + (timeDiff.days * 24)
+                    remainingMin = (timeDiff.seconds // 60) % 60
+                    remainingSec = timeDiff.seconds % 60
+
+                    # Ready the return structure
+                    funcResult["result"] = "NotReady"
+                    funcResult["timeRemaining"]["hour"] = remainingHour
+                    funcResult["timeRemaining"]["minute"] = remainingMin
+                    funcResult["timeRemaining"]["second"] = remainingSec
+
+                else:
+                    funcResult["result"] = "Claimable"
+            else:
+                funcResult["result"] = "Claimable"
+        else:
+            funcResult["result"] = "XrpIdNotFound"
+
+        return funcResult
+
     async def getBonusStatus(self, xrpId: str) -> dict:
         # Return structure
         funcResult = {
@@ -52,75 +89,11 @@ class XparrotDB:
 
             # Check if there are results
             # No result would only mean that xrpId is not found
-            if result:
-                lastClaim, currentTime = result
+            funcResult = self.check_cooldown(result, funcResult)
 
-                # Check if the user has ever claimed their dailies
-                # If not, the dailies are available to redeem
-                if lastClaim and not lastClaim == "0000-00-00 00:00:00":
-                    lastClaim = (
-                        datetime.strptime(lastClaim, "%Y-%m-%d %H:%M:%S")
-                        if type(lastClaim) == str
-                        else lastClaim
-                    )
-                    nextClaim = lastClaim + timedelta(days=1)
+            loggingInstance.info(f"getBonusStatus({xrpId}): {funcResult['result']}")
 
-                    # Check if the currentTime is past than nextClaim
-                    if nextClaim > currentTime:
-
-                        # compute the remaining time
-                        timeDiff: timedelta = nextClaim - currentTime
-
-                        remainingHour = timeDiff.seconds // 3600 + (timeDiff.days * 24)
-                        remainingMin = (timeDiff.seconds // 60) % 60
-                        remainingSec = timeDiff.seconds % 60
-
-                        # Ready the return structure
-                        funcResult["result"] = "NotReady"
-                        funcResult["timeRemaining"]["hour"] = remainingHour
-                        funcResult["timeRemaining"]["minute"] = remainingMin
-                        funcResult["timeRemaining"]["second"] = remainingSec
-
-                        (
-                            loggingInstance.info(
-                                f"getBonusStatus({xrpId}): {funcResult}"
-                            )
-                            if self.verbose
-                            else None
-                        )
-
-                        return funcResult
-
-                    else:
-                        funcResult["result"] = "Claimable"
-                        (
-                            loggingInstance.info(
-                                f"getBonusStatus({xrpId}): {funcResult['result']}"
-                            )
-                            if self.verbose
-                            else None
-                        )
-                        return funcResult
-                else:
-                    funcResult["result"] = "Claimable"
-                    (
-                        loggingInstance.info(
-                            f"getBonusStatus({xrpId}): {funcResult['result']}"
-                        )
-                        if self.verbose
-                        else None
-                    )
-                    return funcResult
-            else:
-                funcResult["result"] = "XrpIdNotFound"
-                (
-                    loggingInstance.error(
-                        f"getBonusStatus({xrpId}): {funcResult['result']}"
-                    )
-                    if self.verbose
-                    else None
-                )
-                return funcResult
+            return funcResult
 
     async def getBonusAmount(self, xrpId: str) -> dict:
         async with self.asyncSessionMaker() as session:
