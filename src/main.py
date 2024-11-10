@@ -89,6 +89,45 @@ async def sendCoin(value, address, memo, ctx):
     return status
 
 
+async def checkStatus(result, ctx):
+    if result["result"] == "Claimable":
+        return True
+
+    if result["result"] == "NotReady":
+        remainingHour = result["timeRemaining"]["hour"]
+        remainingMinute = result["timeRemaining"]["minute"]
+        remainingSecond = result["timeRemaining"]["second"]
+
+        description = (
+            "Your Bonus XRAIN rewards have already been claimed, please wait **__"
+        )
+        description += f"{remainingHour}hr" if int(remainingHour) != 0 else ""
+        description += f" {remainingMinute}min" if int(remainingMinute) != 0 else ""
+        description += f" {remainingSecond}s" if int(remainingSecond) != 0 else ""
+        description += "__** to the next XRAIN claim period."
+
+        embed = Embed(
+            title="XRAIN Claim", description=description, timestamp=datetime.now()
+        )
+
+        embed.set_footer(text="XRPLRainforest Bonus")
+
+        await ctx.send(embed=embed)
+
+    else:
+        embed = Embed(
+            title="XRAIN Claim",
+            description=f"{result['result']} error occurred",
+            timestamp=datetime.now(),
+        )
+
+        embed.set_footer(text="XRPLRainforest Bonus")
+
+        await ctx.send(embed=embed)
+
+    return False
+
+
 @listen()
 async def on_ready():
     # Some function to do when the bot is ready
@@ -131,87 +170,59 @@ async def bonusXrain(ctx: InteractionContext):
 
     result = await dbInstance.getBonusStatus(xrpId)
 
-    if result["result"] == "Claimable":
-        claimInfo = await dbInstance.getBonusAmount(xrpId)
-        if claimInfo["result"] == "Success":
-            claimAmount = claimInfo["amount"]
-            claimImage = claimInfo["nftLink"]
-            tokenId = claimInfo["tokenId"]
-            taxonId = claimInfo["taxonId"]
+    claimable = await checkStatus(result, ctx)
 
-            try:
-                message = await dbInstance.getClaimQuote(taxonId)
-            except Exception as e:
-                ctx.send(f"{e} error occurred")
-                return
+    if not claimable:
+        return
 
-            sendSuccess = await sendCoin(
-                value=claimAmount,
-                address=xrpId,
-                memos="XRPLRainforest Bonus Rewards",
-                ctx=ctx,
-            )
+    claimInfo = await dbInstance.getBonusAmount(xrpId)
+    if claimInfo["result"] == "Success":
+        claimAmount = claimInfo["amount"]
+        claimImage = claimInfo["nftLink"]
+        tokenId = claimInfo["tokenId"]
+        taxonId = claimInfo["taxonId"]
 
-            if not sendSuccess:
-                return
+        try:
+            message = await dbInstance.getClaimQuote(taxonId)
+        except Exception as e:
+            ctx.send(f"{e} error occurred")
+            return
 
-            await dbInstance.bonusSet(xrpId)
-
-            authorName = escapeMarkdown(ctx.author.display_name)
-
-            claimEmbed = Embed(
-                title="XRAIN Claim",
-                description=f"Congratulations {authorName} you have claimed your XRPLRainforest Bonus XRAIN rewards totaling **__{claimAmount}__** XRAIN!! Claim again in **__24 Hours__**!",
-            )
-
-            messageEmbed = Embed(
-                description=f"**{message['description']}**", timestamp=datetime.now()
-            )
-            messageEmbed.set_footer(text="XRPLRainforest Bonus")
-
-            imageEmbed = Embed(
-                description=f"[View NFT Details](https://xrp.cafe/nft/{tokenId})"
-            )
-
-            imageEmbed.set_image(url=claimImage)
-
-            await ctx.send(embeds=[claimEmbed, imageEmbed, messageEmbed])
-        else:
-            embed = Embed(
-                title="XRAIN Claim",
-                description=f"{claimInfo['result']} error occurred",
-                timestamp=datetime.now(),
-            )
-
-            embed.set_footer(text="XRPLRainforest Bonus")
-
-            await ctx.send(embed=embed)
-
-    elif result["result"] == "NotReady":
-        remainingHour = result["timeRemaining"]["hour"]
-        remainingMinute = result["timeRemaining"]["minute"]
-        remainingSecond = result["timeRemaining"]["second"]
-
-        description = (
-            "Your Bonus XRAIN rewards have already been claimed, please wait **__"
-        )
-        description += f"{remainingHour}hr" if int(remainingHour) != 0 else ""
-        description += f" {remainingMinute}min" if int(remainingMinute) != 0 else ""
-        description += f" {remainingSecond}s" if int(remainingSecond) != 0 else ""
-        description += "__** to the next XRAIN claim period."
-
-        embed = Embed(
-            title="XRAIN Claim", description=description, timestamp=datetime.now()
+        sendSuccess = await sendCoin(
+            value=claimAmount,
+            address=xrpId,
+            memos="XRPLRainforest Bonus Rewards",
+            ctx=ctx,
         )
 
-        embed.set_footer(text="XRPLRainforest Bonus")
+        if not sendSuccess:
+            return
 
-        await ctx.send(embed=embed)
+        await dbInstance.bonusSet(xrpId)
 
+        authorName = escapeMarkdown(ctx.author.display_name)
+
+        claimEmbed = Embed(
+            title="XRAIN Claim",
+            description=f"Congratulations {authorName} you have claimed your XRPLRainforest Bonus XRAIN rewards totaling **__{claimAmount}__** XRAIN!! Claim again in **__24 Hours__**!",
+        )
+
+        messageEmbed = Embed(
+            description=f"**{message['description']}**", timestamp=datetime.now()
+        )
+        messageEmbed.set_footer(text="XRPLRainforest Bonus")
+
+        imageEmbed = Embed(
+            description=f"[View NFT Details](https://xrp.cafe/nft/{tokenId})"
+        )
+
+        imageEmbed.set_image(url=claimImage)
+
+        await ctx.send(embeds=[claimEmbed, imageEmbed, messageEmbed])
     else:
         embed = Embed(
             title="XRAIN Claim",
-            description=f"{result['result']} error occurred",
+            description=f"{claimInfo['result']} error occurred",
             timestamp=datetime.now(),
         )
 
