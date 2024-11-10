@@ -186,7 +186,7 @@ async def bonusXrain(ctx: InteractionContext):
         try:
             message = await dbInstance.getClaimQuote(taxonId)
         except Exception as e:
-            ctx.send(f"{e} error occurred")
+            await ctx.send(f"{e} error occurred")
             return
 
         sendSuccess = await sendCoin(
@@ -283,7 +283,7 @@ async def biweeklyXrain(ctx: InteractionContext):
     nftData = await dbInstance.getRandomNFT(xrpId)
 
     if nftData == "NoNFTFound":
-        ctx.send("This xrpID has no XRPLRainforest NFTs")
+        await ctx.send("This xrpID has no XRPLRainforest NFTs")
         return
 
     await dbInstance.biweeklySet(xrpId)
@@ -295,7 +295,7 @@ async def biweeklyXrain(ctx: InteractionContext):
     try:
         message = await dbInstance.getClaimQuote(taxonId)
     except Exception as e:
-        ctx.send(f"{e} error occurred")
+        await ctx.send(f"{e} error occurred")
         return
 
     authorName = escapeMarkdown(ctx.author.display_name)
@@ -354,7 +354,7 @@ async def biweeklyXrainTraits(ctx: InteractionContext):
         if randomNFT == "NoNFTFound":
             raise Exception("NoNFTFound")
     except Exception as e:
-        ctx.send(f"{e} error occurred")
+        await ctx.send(f"{e} error occurred")
         return
 
     claimable = await checkStatus(result, ctx, rewardName="Traits XRAIN")
