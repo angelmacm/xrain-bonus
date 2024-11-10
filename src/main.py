@@ -67,13 +67,13 @@ def precision(value, precision=6):
     return round(float(value), precision)
 
 
-async def sendCoin(value, address, memo, ctx):
+async def sendCoin(value, address, memos, ctx):
     status = True
     sendSuccess = await xrplInstance.sendCoin(
         address=address,
         value=precision(value),
         coinHex=coinsConfig["XRAIN"],
-        memos=memo,
+        memos=memos,
     )
 
     if not sendSuccess["result"]:
