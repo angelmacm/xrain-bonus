@@ -31,23 +31,29 @@ xrplInstance = XRPClient(xrplConfig)
 
 botVerbosity = botConfig.getboolean("verbose")
 
-cooldowns = {"bonus-xrain": {}, "biweekly-xrain": {}, "biweekly-xrain-traits": {}}
+cooldowns = {}
 
 
-def is_on_cooldown(user_id: int, command_name: str) -> bool:
+async def is_on_cooldown(ctx: InteractionContext) -> bool:
+    user_id = ctx.author_id
+    command_name = ctx._command_name
+    if command_name not in cooldowns:
+        cooldowns[command_name] = {}
+
     """Check if the user is on cooldown for a specific command."""
     print(f"Checking {user_id} for cooldown")
     now = datetime.now()
     if user_id in cooldowns[command_name]:
         last_used = cooldowns[command_name][user_id]
         if (now - last_used).total_seconds() < botConfig.getfloat("command_cooldown"):
+            await ctx.send(
+                f"You are on cooldown for this command. Please wait {botConfig.getfloat("command_cooldown")}s before using it again.",
+                ephemeral=True,
+            )
             return True
-    return False
 
-
-def set_cooldown(user_id: int, command_name: str):
-    """Set the cooldown for a user for a specific command."""
     cooldowns[command_name][user_id] = datetime.now()
+    return False
 
 
 def escapeMarkdown(text: str) -> str:
@@ -152,13 +158,8 @@ async def on_ready():
 async def bonusXrain(ctx: InteractionContext):
     await ctx.defer()  # Defer the response to wait for the function to run.
 
-    if is_on_cooldown(ctx.author_id, "bonus-xrain"):
-        await ctx.send(
-            f"You are on cooldown for this command. Please wait {botConfig.getfloat("command_cooldown")}s before using it again."
-        )
+    if is_on_cooldown(ctx):
         return
-    else:
-        set_cooldown(ctx.author_id, "bonus-xrain")
 
     (
         loggingInstance.info(f"Bonus Claim requested by {ctx.author.display_name}")
@@ -255,13 +256,8 @@ async def biweeklyXrain(ctx: InteractionContext):
 
     await ctx.defer()  # Defer the response to wait for the function to run.
 
-    if is_on_cooldown(ctx.author_id, "biweekly-xrain"):
-        await ctx.send(
-            f"You are on cooldown for this command. Please wait {botConfig.getfloat("command_cooldown")} before using it again."
-        )
+    if is_on_cooldown(ctx):
         return
-    else:
-        set_cooldown(ctx.author_id, "biweekly-xrain")
 
     xrpId = ctx.args[0]
 
@@ -339,7 +335,7 @@ async def biweeklyXrainTraits(ctx: InteractionContext):
 
     (
         loggingInstance.info(
-            f"/biweekly-xrain-traits requested by {ctx.author.display_name}"
+            f"/daily-xrain-traits requested by {ctx.author.display_name}"
         )
         if botVerbosity
         else None
@@ -347,13 +343,9 @@ async def biweeklyXrainTraits(ctx: InteractionContext):
 
     await ctx.defer()  # Defer the response to wait for the function to run.
 
-    if is_on_cooldown(ctx.author_id, "biweekly-xrain-traits"):
-        await ctx.send(
-            f"You are on cooldown for this command. Please wait {botConfig.getfloat("command_cooldown")} before using it again."
-        )
+    if is_on_cooldown(ctx):
         return
-    else:
-        set_cooldown(ctx.author_id, "biweekly-xrain-traits")
+
     xrpId = ctx.args[0]
 
     try:
