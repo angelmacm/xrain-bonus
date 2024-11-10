@@ -235,8 +235,8 @@ async def bonusXrain(ctx: InteractionContext):
 # Parameters:
 #       XRP ID: [Required] XRP Address where the users hold their NFTs and the receipient of the reward
 @slash_command(
-    name="biweekly-xrain",
-    description="Redeem bi-weekly rewards",
+    name="daily-xrain-rep",
+    description="Redeem daily reputation rewards",
     options=[
         slash_str_option(
             name="xrpid",
@@ -265,69 +265,63 @@ async def biweeklyXrain(ctx: InteractionContext):
 
     xrpId = ctx.args[0]
 
-    amount = await dbInstance.getBiWeeklyStatus(xrpId)
+    result = await dbInstance.getBiWeeklyStatus(xrpId)
 
-    if amount:
+    claimable = await checkStatus(result, ctx)
 
-        sendSuccess = await sendCoin(
-            address=xrpId,
-            value=amount,
-            memos="XRPLRainforest Bonus Biweekly Reputation Rewards",
-            ctx=ctx,
-        )
+    if not claimable:
+        return
 
-        if not sendSuccess:
-            return
+    amount = precision(result["amount"] / 14)
 
-        nftData = await dbInstance.getRandomNFT(xrpId)
+    sendSuccess = await sendCoin(
+        address=xrpId,
+        value=amount,
+        memos="XRPLRainforest Bonus Biweekly Reputation Rewards",
+        ctx=ctx,
+    )
 
-        if nftData == "NoNFTFound":
-            ctx.send("This xrpID has no XRPLRainforest NFTs")
-            return
+    if not sendSuccess:
+        return
 
-        await dbInstance.biweeklySet(xrpId)
+    nftData = await dbInstance.getRandomNFT(xrpId)
 
-        tokenId = nftData["tokenId"]
-        nftLink = nftData["nftLink"]
-        taxonId = nftData["taxonId"]
+    if nftData == "NoNFTFound":
+        ctx.send("This xrpID has no XRPLRainforest NFTs")
+        return
 
-        try:
-            message = await dbInstance.getClaimQuote(taxonId)
-        except Exception as e:
-            ctx.send(f"{e} error occurred")
-            return
+    await dbInstance.biweeklySet(xrpId)
 
-        authorName = escapeMarkdown(ctx.author.display_name)
+    tokenId = nftData["tokenId"]
+    nftLink = nftData["nftLink"]
+    taxonId = nftData["taxonId"]
 
-        claimEmbed = Embed(
-            title="XRAIN Claim",
-            description=f"Congratulations {authorName} you have claimed your XRPLRainforest Bonus Bi-weekly XRAIN Reputation Rewards totaling **__{amount}__** XRAINs!!",
-        )
+    try:
+        message = await dbInstance.getClaimQuote(taxonId)
+    except Exception as e:
+        ctx.send(f"{e} error occurred")
+        return
 
-        messageEmbed = Embed(
-            description=f"**{message['description']}**", timestamp=datetime.now()
-        )
-        messageEmbed.set_footer(text="XRPLRainforest Bi-weekly Bonus")
+    authorName = escapeMarkdown(ctx.author.display_name)
 
-        imageEmbed = Embed(
-            description=f"[View NFT Details](https://xrp.cafe/nft/{tokenId})"
-        )
+    claimEmbed = Embed(
+        title="XRAIN Claim",
+        description=f"Congratulations {authorName} you have claimed your XRPLRainforest Bonus Daily XRAIN Reputation Rewards totaling **__{amount}__** XRAINs!!",
+    )
 
-        if nftLink != "NoNFTFound":
-            imageEmbed.add_image(nftLink)
+    messageEmbed = Embed(
+        description=f"**{message['description']}**", timestamp=datetime.now()
+    )
+    messageEmbed.set_footer(text="XRPLRainforest Bi-weekly Bonus")
 
-        await ctx.send(embeds=[claimEmbed, imageEmbed, messageEmbed])
+    imageEmbed = Embed(
+        description=f"[View NFT Details](https://xrp.cafe/nft/{tokenId})"
+    )
 
-    else:
-        embed = Embed(
-            title="XRAIN Claim",
-            description="Bonus Bi-weekly XRAIN Reputation Rewards has already been claimed or the ReputationalFlag has been triggered for this xrpId",
-            timestamp=datetime.now(),
-        )
+    if nftLink != "NoNFTFound":
+        imageEmbed.add_image(nftLink)
 
-        embed.set_footer(text="XRPLRainforest Bi-weekly Bonus")
-
-        await ctx.send(embed=embed)
+    await ctx.send(embeds=[claimEmbed, imageEmbed, messageEmbed])
 
 
 @slash_command(

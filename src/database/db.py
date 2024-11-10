@@ -31,7 +31,8 @@ class XparrotDB:
 
     def check_cooldown(self, result, funcResult):
         if result:
-            lastClaim, currentTime = result
+            lastClaim = result[0]
+            currentTime = result[1]
 
             if lastClaim and not lastClaim == "0000-00-00 00:00:00":
                 lastClaim = (
@@ -162,46 +163,33 @@ class XparrotDB:
                 )
                 return funcResult
 
-    async def getBiWeeklyStatus(self, xrpId) -> bool | int:
+    async def getBiWeeklyStatus(self, xrpId) -> dict:
+        funcResult = {
+            "result": "",
+            "timeRemaining": {
+                "hour": 0,
+                "minute": 0,
+                "second": 0,
+            },
+        }
 
         async with self.asyncSessionMaker() as session:
             query = select(
+                RewardsTable.dailyRepFlagDate,
+                func.now(),
                 RewardsTable.penaltyReputationRewards,
-                RewardsTable.bonusXrainFlag,
-                RewardsTable.reputationFlag,
             ).filter(RewardsTable.xrpId == xrpId)
             queryResult = await session.execute(query)
             queryResult = queryResult.first()
 
+            funcResult = self.check_cooldown(queryResult, funcResult)
+
             if queryResult:
-                rewardAmount, bonusFlag, repFlag = queryResult
-                if bonusFlag == 1 or repFlag == 1:
+                funcResult["amount"] = queryResult[3]
 
-                    (
-                        loggingInstance.error(
-                            f"getBiWeeklyStatus({xrpId}): BonusReputationFlagTriggered "
-                        )
-                        if self.verbose
-                        else None
-                    )
-                    return False
+            loggingInstance.info(f"getBonusStatus({xrpId}): {funcResult['result']}")
 
-                (
-                    loggingInstance.info(
-                        f"getBiWeeklyStatus({xrpId}): Bi-Weekly reward is {rewardAmount}"
-                    )
-                    if self.verbose
-                    else None
-                )
-                return rewardAmount
-
-            else:
-                (
-                    loggingInstance.error(f"getBiWeeklyStatus({xrpId}): XrpIdNotFound")
-                    if self.verbose
-                    else None
-                )
-                return False
+            return funcResult
 
     async def biweeklySet(self, xrpId) -> None:
         async with self.asyncSessionMaker() as session:
@@ -210,7 +198,7 @@ class XparrotDB:
                     await session.execute(
                         update(RewardsTable)
                         .where(RewardsTable.xrpId == xrpId)
-                        .values(bonusXrainFlag=1)
+                        .values(dailyRepFlagDate=func.now())
                     )
                     if self.verbose:
                         loggingInstance.info(f"biweeklySet({xrpId}): Success")
