@@ -57,6 +57,38 @@ def escapeMarkdown(text: str) -> str:
     return text
 
 
+def precision(value, precision=6):
+    return round(float(value), precision)
+
+
+async def sendCoin(value, address, memo, ctx):
+    status = True
+    sendSuccess = await xrplInstance.sendCoin(
+        address=address,
+        value=precision(value),
+        coinHex=coinsConfig["XRAIN"],
+        memos=memo,
+    )
+
+    if not sendSuccess["result"]:
+        status = False
+        if "tecPATH_DRY" in str(sendSuccess["error"]):
+            embed = Embed(
+                title="XRAIN Claim",
+                description=f"Please setup XRAIN trustline to claim rewards by clicking this [link](https://xrpl.services/?issuer=rh3tLHbXwZsp7eciw2Qp8g7bN9RnyGa2pF&currency=585241494E000000000000000000000000000000&limit=21000000)",
+                timestamp=datetime.now(),
+            )
+        else:
+            embed = Embed(
+                title="XRAIN Claim",
+                description=f"{sendSuccess['error'] if sendSuccess['error'] is not None else 'Unknown'} error occurred",
+                timestamp=datetime.now(),
+            )
+        await ctx.send(embed=embed)
+
+    return status
+
+
 @listen()
 async def on_ready():
     # Some function to do when the bot is ready
@@ -113,28 +145,14 @@ async def bonusXrain(ctx: InteractionContext):
                 ctx.send(f"{e} error occurred")
                 return
 
-            await xrplInstance.registerSeed(xrplConfig["seed"])
-            sendSuccess = await xrplInstance.sendCoin(
+            sendSuccess = await sendCoin(
+                value=claimAmount,
                 address=xrpId,
-                value=int(claimAmount),
-                coinHex=coinsConfig["XRAIN"],
                 memos="XRPLRainforest Bonus Rewards",
+                ctx=ctx,
             )
 
-            if not sendSuccess["result"]:
-                if "tecPATH_DRY" in str(sendSuccess["error"]):
-                    embed = Embed(
-                        title="XRAIN Claim",
-                        description=f"Please setup XRAIN trustline to claim rewards by clicking this [link](https://xrpl.services/?issuer=rh3tLHbXwZsp7eciw2Qp8g7bN9RnyGa2pF&currency=585241494E000000000000000000000000000000&limit=21000000)",
-                        timestamp=datetime.now(),
-                    )
-                else:
-                    embed = Embed(
-                        title="XRAIN Claim",
-                        description=f"{sendSuccess['error'] if sendSuccess['error'] is not None else 'Unknown'} error occurred",
-                        timestamp=datetime.now(),
-                    )
-                await ctx.send(embed=embed)
+            if not sendSuccess:
                 return
 
             await dbInstance.bonusSet(xrpId)
@@ -240,28 +258,14 @@ async def biweeklyXrain(ctx: InteractionContext):
 
     if amount:
 
-        await xrplInstance.registerSeed(xrplConfig["seed"])
-        sendSuccess = await xrplInstance.sendCoin(
+        sendSuccess = await sendCoin(
             address=xrpId,
-            value=int(amount),
-            coinHex=coinsConfig["XRAIN"],
+            value=amount,
             memos="XRPLRainforest Bonus Biweekly Reputation Rewards",
+            ctx=ctx,
         )
 
-        if not sendSuccess["result"]:
-            if "tecPATH_DRY" in str(sendSuccess["error"]):
-                embed = Embed(
-                    title="XRAIN Claim",
-                    description=f"Please setup XRAIN trustline to claim rewards by clicking this [link](https://xrpl.services/?issuer=rh3tLHbXwZsp7eciw2Qp8g7bN9RnyGa2pF&currency=585241494E000000000000000000000000000000&limit=21000000)",
-                    timestamp=datetime.now(),
-                )
-            else:
-                embed = Embed(
-                    title="XRAIN Claim",
-                    description=f"{sendSuccess['error'] if sendSuccess['error'] is not None else 'Unknown'} error occurred",
-                    timestamp=datetime.now(),
-                )
-            await ctx.send(embed=embed)
+        if not sendSuccess:
             return
 
         nftData = await dbInstance.getRandomNFT(xrpId)
@@ -358,28 +362,14 @@ async def biweeklyXrainTraits(ctx: InteractionContext):
 
     if nftInfo["traitXrainFlag"] is not None:
 
-        await xrplInstance.registerSeed(xrplConfig["seed"])
-        sendSuccess = await xrplInstance.sendCoin(
+        sendSuccess = await sendCoin(
             address=xrpId,
-            value=int(nftInfo["traitReward"]),
-            coinHex=coinsConfig["XRAIN"],
+            value=nftInfo["traitReward"],
             memos="XRPLRainforest Bonus Biweekly Trait Rewards",
+            ctx=ctx,
         )
 
-        if not sendSuccess["result"]:
-            if "tecPATH_DRY" in str(sendSuccess["error"]):
-                embed = Embed(
-                    title="XRAIN Claim",
-                    description=f"Please setup XRAIN trustline to claim rewards by clicking this [link](https://xrpl.services/?issuer=rh3tLHbXwZsp7eciw2Qp8g7bN9RnyGa2pF&currency=585241494E000000000000000000000000000000&limit=21000000)",
-                    timestamp=datetime.now(),
-                )
-            else:
-                embed = Embed(
-                    title="XRAIN Claim",
-                    description=f"{sendSuccess['error'] if sendSuccess['error'] is not None else 'Unknown'} error occurred",
-                    timestamp=datetime.now(),
-                )
-            await ctx.send(embed=embed)
+        if not sendSuccess:
             return
 
         await dbInstance.setPenaltyStatusClaimed(xrpId)
