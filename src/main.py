@@ -268,7 +268,7 @@ async def biweeklyXrain(ctx: InteractionContext):
     if not claimable:
         return
 
-    amount = precision(result["amount"] / 14)
+    amount = max(precision(result["amount"] / 14), 0.01)
 
     sendSuccess = await sendCoin(
         address=xrpId,
@@ -362,7 +362,7 @@ async def biweeklyXrainTraits(ctx: InteractionContext):
     if not claimable:
         return
 
-    amount = precision(result["amount"] / 14)
+    amount = max(precision(result["amount"] / 14), 0.01)
 
     sendSuccess = await sendCoin(
         address=xrpId,
