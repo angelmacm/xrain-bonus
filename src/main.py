@@ -95,7 +95,7 @@ async def sendCoin(value, address, memo, ctx):
     return status
 
 
-async def checkStatus(result, ctx):
+async def checkStatus(result, ctx, rewardName):
     if result["result"] == "Claimable":
         return True
 
@@ -105,7 +105,7 @@ async def checkStatus(result, ctx):
         remainingSecond = result["timeRemaining"]["second"]
 
         description = (
-            "Your Bonus XRAIN rewards have already been claimed, please wait **__"
+            f"Your {rewardName} rewards have already been claimed, please wait **__"
         )
         description += f"{remainingHour}hr" if int(remainingHour) != 0 else ""
         description += f" {remainingMinute}min" if int(remainingMinute) != 0 else ""
@@ -171,7 +171,7 @@ async def bonusXrain(ctx: InteractionContext):
 
     result = await dbInstance.getBonusStatus(xrpId)
 
-    claimable = await checkStatus(result, ctx)
+    claimable = await checkStatus(result, ctx, rewardName="Bonus XRAIN")
 
     if not claimable:
         return
@@ -263,7 +263,7 @@ async def biweeklyXrain(ctx: InteractionContext):
 
     result = await dbInstance.getBiWeeklyStatus(xrpId)
 
-    claimable = await checkStatus(result, ctx)
+    claimable = await checkStatus(result, ctx, rewardName="Reputation XRAIN")
 
     if not claimable:
         return
@@ -357,7 +357,7 @@ async def biweeklyXrainTraits(ctx: InteractionContext):
         ctx.send(f"{e} error occurred")
         return
 
-    claimable = await checkStatus(result, ctx)
+    claimable = await checkStatus(result, ctx, rewardName="Traits XRAIN")
 
     if not claimable:
         return
