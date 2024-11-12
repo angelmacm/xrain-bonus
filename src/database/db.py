@@ -4,8 +4,9 @@ from database.models.rewardstable import RewardsTable
 from database.models.nftTraitList import NFTTraitList
 from database.models.claimQuotes import ClaimQuotes
 from sqlalchemy.sql import func
-from datetime import timedelta, datetime
+from datetime import timedelta, datetime, timezone
 from sqlalchemy.future import select
+from pytz import timezone as tz
 
 from utils.logging import loggingInstance
 
@@ -176,7 +177,7 @@ class XparrotDB:
         async with self.asyncSessionMaker() as session:
             query = select(
                 RewardsTable.dailyRepFlagDate,
-                func.now(),
+                func.utc_timestamp(),
                 RewardsTable.penaltyReputationRewards,
             ).filter(RewardsTable.xrpId == xrpId)
             queryResult = await session.execute(query)
@@ -198,7 +199,7 @@ class XparrotDB:
                     await session.execute(
                         update(RewardsTable)
                         .where(RewardsTable.xrpId == xrpId)
-                        .values(dailyRepFlagDate=func.now())
+                        .values(dailyRepFlagDate=self.getLastRedemption())
                     )
                     if self.verbose:
                         loggingInstance.info(f"biweeklySet({xrpId}): Success")
@@ -318,7 +319,7 @@ class XparrotDB:
         async with self.asyncSessionMaker() as session:
             query = select(
                 RewardsTable.dailyTraitFlagDate,
-                func.now(),
+                func.utc_timestamp(),
                 RewardsTable.penaltyTraits3DRewards,
             ).filter(RewardsTable.xrpId == xrpId)
             queryResult = await session.execute(query)
@@ -340,7 +341,7 @@ class XparrotDB:
                     await session.execute(
                         update(RewardsTable)
                         .where(RewardsTable.xrpId == xrpId)
-                        .values(dailyTraitFlagDate=func.now())
+                        .values(dailyTraitFlagDate=self.getLastRedemption())
                     )
                     if self.verbose:
                         loggingInstance.info(
@@ -350,3 +351,21 @@ class XparrotDB:
                     if self.verbose:
                         loggingInstance.error(f"setPenaltyStatusClaimed({xrpId}): {e}")
                     await session.rollback()
+
+    def getLastRedemption(self):
+        est = tz("US/Eastern")
+        current_time = datetime.now(timezone.utc)
+        current_est = current_time.astimezone(est)
+        lastEst = datetime(
+            current_est.year,
+            current_est.month,
+            current_est.day,
+            19,
+            0,
+            0,
+            tzinfo=est,
+        )
+        if current_est < lastEst:
+            lastEst += timedelta(days=-1)
+
+        return lastEst.astimezone(timezone.utc)
