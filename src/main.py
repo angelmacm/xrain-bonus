@@ -122,6 +122,12 @@ async def checkStatus(result, ctx, rewardName):
             description=f"XRP Address not found in our database, please open a support ticket for assistance",
             timestamp=datetime.now(),
         )
+    elif result["result"] == "flagged":
+        embed = Embed(
+            title="XRAIN Claim",
+            description=f"You are not eligible for {rewardName} rewards. Open support ticket for assistance.",
+            timestamp=datetime.now(),
+        )
     else:
         embed = Embed(
             title="XRAIN Claim",
@@ -264,7 +270,7 @@ async def biweeklyXrain(ctx: InteractionContext):
 
     result = await dbInstance.getBiWeeklyStatus(xrpId)
 
-    claimable = await checkStatus(result, ctx, rewardName="Reputation XRAIN")
+    claimable = await checkStatus(result, ctx, rewardName="Reputation $XRAIN")
 
     if not claimable:
         return

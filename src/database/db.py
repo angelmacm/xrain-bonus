@@ -179,6 +179,7 @@ class XparrotDB:
                 RewardsTable.dailyRepFlagDate,
                 func.utc_timestamp(),
                 RewardsTable.penaltyReputationRewards,
+                RewardsTable.reputationFlag,
             ).filter(RewardsTable.xrpId == xrpId)
             queryResult = await session.execute(query)
             queryResult = queryResult.first()
@@ -186,7 +187,9 @@ class XparrotDB:
             funcResult = self.check_cooldown(queryResult, funcResult)
 
             if queryResult:
-                x, y, funcResult["amount"] = queryResult
+                x, y, funcResult["amount"], reputationFlag = queryResult
+                if reputationFlag:
+                    funcResult["result"] = "flagged"
 
             loggingInstance.info(f"getBonusStatus({xrpId}): {funcResult['result']}")
 
