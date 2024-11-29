@@ -442,7 +442,7 @@ async def biweeklyXrainTraits(ctx: InteractionContext):
 
 @slash_command(
     name="xrain-amm-claim",
-    description="Claim your AMM bonus OGcoin tokens",
+    description="Claim your AMM bonus XRAIN tokens",
     options=[
         slash_str_option(
             name="xrpid",
@@ -513,12 +513,29 @@ async def xrain_amm_claim(ctx: InteractionContext):
         message=f"Congratulations **{authorName}** you have claimed **__{claimAmount}__** $XRAIN based on the XRP/XRAIN LP tokens you hold!!",
         color=color,
     )
-
-    claimEmbed.set_footer(text="OGcoin AMM Bonus")
-
     embeds.append(claimEmbed)
 
+    nftInfo = await dbInstance.getRandomNFT(xrpId)
+    if "nftLink" in nftInfo:
+        imageEmbed = Embed(color=color)
+        imageEmbed.add_image(nftInfo["nftLink"])
+        embeds.append(imageEmbed)
+
+    if "taxonId" in nftInfo:
+        try:
+            message = await dbInstance.getClaimQuote(nftInfo["taxonId"])
+        except Exception as e:
+            await ctx.send(f"{e} error occurred")
+            return
+        messageEmbed = Embed(
+            description=f"**{message['description']}**",
+            timestamp=datetime.now(),
+            color=color,
+        )
+        embeds.append(messageEmbed)
+
     embeds[-1].timestamp = datetime.now()
+    embeds[-1].set_footer("XRPL Rainforest AMM Claim")
 
     await ctx.send(embeds=embeds)
 
