@@ -355,6 +355,52 @@ class XparrotDB:
                         loggingInstance.error(f"setPenaltyStatusClaimed({xrpId}): {e}")
                     await session.rollback()
 
+    async def get_amm_status(self, xrpId, min_amount):
+        funcResult = {
+            "result": "",
+            "timeRemaining": {
+                "hour": 0,
+                "minute": 0,
+                "second": 0,
+            },
+        }
+
+        async with self.asyncSessionMaker() as session:
+            query = select(
+                RewardsTable.ammFlagDate,
+                func.utc_timestamp(),
+                RewardsTable.penaltyTraits3DRewards,
+            ).filter(RewardsTable.xrpId == xrpId)
+            queryResult = await session.execute(query)
+            queryResult = queryResult.first()
+
+            funcResult = self.check_cooldown(queryResult, funcResult)
+
+            if queryResult:
+                x, y, nftAmount = queryResult
+                if nftAmount < min_amount:
+                    funcResult["result"] = "minNFTCount"
+
+            loggingInstance.info(f"get_amm_status({xrpId}): {nftAmount}")
+
+            return funcResult
+
+    async def update_amm_claimed(self, xrpId):
+        async with self.asyncSessionMaker() as session:
+            async with session.begin():
+                try:
+                    await session.execute(
+                        update(RewardsTable)
+                        .where(RewardsTable.xrpId == xrpId)
+                        .values(ammFlagDate=self.getLastRedemption())
+                    )
+                    if self.verbose:
+                        loggingInstance.info(f"update_amm_claimed({xrpId}): Success")
+                except Exception as e:
+                    if self.verbose:
+                        loggingInstance.error(f"update_amm_claimed({xrpId}): {e}")
+                    await session.rollback()
+
     def getLastRedemption(self):
         est = tz("US/Eastern")
         current_time = datetime.now(timezone.utc)

@@ -10,7 +10,7 @@ from interactions import (
     InteractionContext,
 )  # General discord Interactions import
 from interactions import slash_command, slash_str_option  # Slash command imports
-from interactions import Embed
+from interactions import Embed, Button, ButtonStyle
 
 # Other imports
 from datetime import datetime
@@ -31,6 +31,8 @@ dbInstance = XparrotDB(
 xrplInstance = XRPClient(xrplConfig)
 
 botVerbosity = botConfig.getboolean("verbose")
+
+MIN_NFT_TO_CLAIM = coinsConfig.getint("min_nft_count")
 
 cooldowns = {}
 
@@ -138,6 +140,14 @@ async def checkStatus(result, ctx, rewardName):
             description=f"You are not eligible for {rewardName} rewards. Open support ticket for assistance.",
             timestamp=datetime.now(),
         )
+
+    elif result["result"] == "minNFTCount":
+        embed = prepare_message(
+            f"Your XRP ID does not hold enough OG NFTs. You must hold a min of {MIN_NFT_TO_CLAIM} OG NFT to claim daily OGcoins based on AMM LP tokens."
+        )
+        await ctx.send(embed=embed)
+        return
+
     else:
         embed = Embed(
             title="XRAIN Claim",
@@ -428,6 +438,89 @@ async def biweeklyXrainTraits(ctx: InteractionContext):
         imageEmbed.add_image(nftLink)
 
     await ctx.send(embeds=[embedClaim, imageEmbed, embedText])
+
+
+@slash_command(
+    name="xrain-amm-claim",
+    description="Claim your AMM bonus OGcoin tokens",
+    options=[
+        slash_str_option(
+            name="xrpid",
+            description="XRP Address that will receive the bonus reward",
+            required=True,
+        )
+    ],
+)
+async def xrain_amm_claim(ctx: InteractionContext):
+
+    if await is_on_cooldown(ctx=ctx):
+        return
+
+    await ctx.defer()  # Defer the response to wait for the function to run.
+
+    (
+        loggingInstance.info(
+            f"/xrain_amm_claim requested by {ctx.author.display_name}: {ctx.author_id}"
+        )
+        if botVerbosity
+        else None
+    )
+
+    xrpId = ctx.args[0]
+
+    coinBalance = await xrplInstance.getAccountBalance(
+        xrpId, coinsConfig.get("XRAIN_LP")
+    )
+
+    if not coinBalance or coinBalance < coinsConfig.getfloat("MINIMUM_FOR_AMM"):
+        buy_link = (
+            "https://xpmarket.com/amm/pool/XRAIN-rh3tLHbXwZsp7eciw2Qp8g7bN9RnyGa2pF/XRP"
+        )
+        embed = prepare_message(
+            f"To claim daily $XRAIN you must hold a minimum of {precision(coinsConfig.getfloat('min_lp_count'))} XRP/XRAIN LP tokens and {coinsConfig.getint("min_nft_count")} XRPL Rainforest NFT in your wallet.\n\nClick this [link]({buy_link}) to add liquidity to XRP/OGcoin AMM pool",
+            "Daily Bonus",
+        )
+        button = Button(
+            style=ButtonStyle.URL,
+            label="Add Liquidity",
+            url=buy_link,
+        )
+        await ctx.send(embed=embed, components=button)
+        return
+
+    result = await dbInstance.get_amm_status(xrpId)
+
+    claimable = await checkStatus(result, ctx, rewardName="AMM XRAIN")
+
+    if not claimable:
+        return
+
+    claimAmount = precision(float(coinBalance * coinsConfig.getfloat("AMM_MULTIPLIER")))
+    sendSuccess = await sendCoin(ctx, claimAmount, xrpId)
+
+    if not sendSuccess:
+        return
+
+    embeds = []
+    color = random_color()
+
+    await dbInstance.update_amm_claimed(xrpId)
+
+    authorName = escapeMarkdown(ctx.author.display_name)
+
+    claimEmbed = prepare_message(
+        title="XRAIN AMM Claim",
+        message=f"Congratulations **{authorName}** you have claimed **__{claimAmount}__** $XRAIN based on the XRP/XRAIN LP tokens you hold!!",
+        color=color,
+    )
+
+    claimEmbed.set_footer(text="OGcoin AMM Bonus")
+
+    embeds.append(claimEmbed)
+
+    embeds[-1].timestamp = datetime.now()
+
+    await ctx.send(embeds=embeds)
 
 
 if __name__ == "__main__":
