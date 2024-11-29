@@ -36,3 +36,4 @@ class RewardsTable(Base):
     discordId = Column(VARCHAR)
     dailyTraitFlagDate = Column(DateTime)
     dailyRepFlagDate = Column(DateTime)
+    ammFlagDate = Column(DateTime)
