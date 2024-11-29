@@ -8,6 +8,7 @@ from xrpl.models.requests.account_lines import AccountLines
 from asyncio import sleep
 from configparser import ConfigParser
 
+from requests import Session
 from utils.logging import loggingInstance
 
 
@@ -234,3 +235,13 @@ class XRPClient:
 
     def getTestMode(self) -> bool:
         return self.xrpLink == self.config["testnet_link"]
+
+    async def getAccountBalance(self, xrpId, token):
+        session = Session()
+        request = session.get(f"https://api.xrpscan.com/api/v1/account/{xrpId}/assets")
+        if request.ok:
+            for asset in request.json():
+                if asset["currency"] == token:
+                    return float(asset["value"])
+
+        return False
