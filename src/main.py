@@ -500,7 +500,12 @@ async def xrain_amm_claim(ctx: InteractionContext):
     claimAmount = precision(
         float(coinBalance * coinsConfig.getfloat("xrain_multiplier"))
     )
-    sendSuccess = await sendCoin(ctx, claimAmount, xrpId)
+    sendSuccess = await sendCoin(
+        address=xrpId,
+        value=claimAmount,
+        memos="XRPLRainforest Bonus AMM Rewards",
+        ctx=ctx,
+    )
 
     if not sendSuccess:
         return
