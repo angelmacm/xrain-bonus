@@ -14,6 +14,7 @@ from interactions import Embed
 
 # Other imports
 from datetime import datetime
+from random import randint
 
 intents = Intents.DEFAULT | Intents.MESSAGE_CONTENT
 client = Client(intents=intents, token=botConfig["token"])
@@ -54,6 +55,15 @@ async def is_on_cooldown(ctx: InteractionContext) -> bool:
 
     cooldowns[command_name][user_id] = datetime.now()
     return False
+
+
+def prepare_message(message, title="One Time Claim", color=None):
+    embed = Embed(
+        title=title if title else None,
+        description=message,
+        color=color if color else random_color(),
+    )
+    return embed
 
 
 def escapeMarkdown(text: str) -> str:
@@ -139,6 +149,15 @@ async def checkStatus(result, ctx, rewardName):
     await ctx.send(embed=embed)
 
     return False
+
+
+def random_color():
+    randomColorCode = str(hex(randint(0, 16777215)))[2:]
+
+    for _ in range(abs(len(randomColorCode) - 6)):
+        randomColorCode += "0"
+
+    return f"#{randomColorCode}"
 
 
 @listen()
