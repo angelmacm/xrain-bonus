@@ -472,7 +472,7 @@ async def xrain_amm_claim(ctx: InteractionContext):
         xrpId, coinsConfig.get("XRAIN_LP")
     )
 
-    if not coinBalance or coinBalance < coinsConfig.getfloat("MINIMUM_FOR_AMM"):
+    if not coinBalance or coinBalance < coinsConfig.getfloat("min_lp_count"):
         buy_link = (
             "https://xpmarket.com/amm/pool/XRAIN-rh3tLHbXwZsp7eciw2Qp8g7bN9RnyGa2pF/XRP"
         )
@@ -490,12 +490,14 @@ async def xrain_amm_claim(ctx: InteractionContext):
 
     result = await dbInstance.get_amm_status(xrpId)
 
-    claimable = await checkStatus(result, ctx, rewardName="AMM XRAIN")
+    claimable = await checkStatus(result, ctx, rewardName="XRAIN AMM")
 
     if not claimable:
         return
 
-    claimAmount = precision(float(coinBalance * coinsConfig.getfloat("AMM_MULTIPLIER")))
+    claimAmount = precision(
+        float(coinBalance * coinsConfig.getfloat("xrain_multiplier"))
+    )
     sendSuccess = await sendCoin(ctx, claimAmount, xrpId)
 
     if not sendSuccess:
