@@ -488,7 +488,9 @@ async def xrain_amm_claim(ctx: InteractionContext):
         await ctx.send(embed=embed, components=button)
         return
 
-    result = await dbInstance.get_amm_status(xrpId)
+    result = await dbInstance.get_amm_status(
+        xrpId, min_amount=coinsConfig.getint("min_nft_count")
+    )
 
     claimable = await checkStatus(result, ctx, rewardName="XRAIN AMM")
 
