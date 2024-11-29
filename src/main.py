@@ -232,6 +232,7 @@ async def bonusXrain(ctx: InteractionContext):
         claimEmbed = Embed(
             title="XRAIN Claim",
             description=f"Congratulations {authorName} you have claimed your XRPLRainforest Bonus XRAIN rewards totaling **__{claimAmount}__** XRAIN!! Claim again in **__24 Hours__**!",
+            color=random_color(),
         )
 
         messageEmbed = Embed(
@@ -329,6 +330,7 @@ async def biweeklyXrain(ctx: InteractionContext):
     claimEmbed = Embed(
         title="XRAIN Claim",
         description=f"Congratulations {authorName} you have claimed your XRPLRainforest Bonus Daily XRAIN Reputation Rewards totaling **__{amount}__** XRAINs!!",
+        color=random_color(),
     )
 
     messageEmbed = Embed(
@@ -410,6 +412,7 @@ async def biweeklyXrainTraits(ctx: InteractionContext):
     embedClaim = Embed(
         title="XRAIN Claim",
         description=f"Congratulations {authorName} you have claimed your XRPLRainforest Daily Traits rewards totalling {amount} XRAIN!!",
+        color=random_color(),
     )
 
     embedText = Embed(
