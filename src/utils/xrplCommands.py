@@ -59,7 +59,7 @@ class XRPClient:
                     else None
                 )
                 # Get the coin issuer from the trustline that is set on the sender's account
-                coinIssuer = await self.getCoinIssuer(coinHex)
+                coinIssuer = self.config.get("coin_issuer")
 
                 # If the issuer is not available on the sender, return
                 if coinIssuer is None:
@@ -170,40 +170,6 @@ class XRPClient:
             funcResult["result"] = False
             funcResult["error"] = e
             return funcResult
-
-    async def getCoinIssuer(self, currency: str) -> str | None:
-
-        # To prevent multiple request of the same coin, return the last value
-        if currency == self.lastCoinChecked:
-            return self.lastCoinIssuer
-
-        try:
-            # Prepare the Account Request Transaction
-            account_lines = AccountLines(
-                account=self.wallet.classic_address, ledger_index="validated"
-            )
-
-            # Request the transaction
-            async with AsyncWebsocketClient(self.xrpLink) as client:
-                response = await client.request(account_lines)
-
-            # Check if the proper key is found in the response
-            if "lines" not in response.result.keys():
-                return
-
-            # Iterate on all the trustlines until the coin is matched. Return the account the trustline is set to.
-            lines = response.result["lines"]
-            for line in lines:
-
-                if line["currency"] == currency:
-                    self.lastCoinIssuer = line["account"]
-                    return self.lastCoinIssuer
-            return
-        except Exception as e:
-            loggingInstance.error(
-                f"Error checking trust line for {self.wallet.classic_address}: {str(e)}"
-            )
-            return
 
     async def checkBalance(self):
         async with AsyncWebsocketClient(self.xrpLink) as client:
