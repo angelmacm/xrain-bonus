@@ -219,12 +219,6 @@ async def bonusXrain(ctx: InteractionContext):
         tokenId = claimInfo["tokenId"]
         taxonId = claimInfo["taxonId"]
 
-        try:
-            message = await dbInstance.getClaimQuote(taxonId)
-        except Exception as e:
-            await ctx.send(f"{e} error occurred")
-            return
-
         sendSuccess = await sendCoin(
             value=claimAmount,
             address=xrpId,
@@ -245,18 +239,13 @@ async def bonusXrain(ctx: InteractionContext):
             color=random_color(),
         )
 
-        messageEmbed = Embed(
-            description=f"**{message['description']}**", timestamp=datetime.now()
-        )
-        messageEmbed.set_footer(text="XRPLRainforest Bonus")
-
         imageEmbed = Embed(
             description=f"[View NFT Details](https://xrp.cafe/nft/{tokenId})"
         )
 
         imageEmbed.set_image(url=claimImage)
 
-        await ctx.send(embeds=[claimEmbed, imageEmbed, messageEmbed])
+        await ctx.send(embeds=[claimEmbed, imageEmbed])
     else:
         embed = Embed(
             title="XRAIN Claim",
@@ -311,7 +300,7 @@ async def biweeklyXrainTraits(ctx: InteractionContext):
     if not claimable:
         return
 
-    amount = max(precision(result["amount"] / 14), 0.01)
+    amount = max(precision(result["amount"] / 30), 0.01)
 
     sendSuccess = await sendCoin(
         address=xrpId,
