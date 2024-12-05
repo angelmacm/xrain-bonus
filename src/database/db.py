@@ -9,6 +9,7 @@ from sqlalchemy.future import select
 from pytz import timezone as tz
 
 from utils.logging import loggingInstance
+from utils.config import coinsConfig
 
 
 class XparrotDB:
@@ -81,9 +82,11 @@ class XparrotDB:
 
         async with self.asyncSessionMaker() as session:
             # Query the required columns
-            query = select(RewardsTable.dailyBonusFlagDate, func.now()).filter(
-                RewardsTable.xrpId == xrpId
-            )
+            query = select(
+                RewardsTable.dailyBonusFlagDate,
+                func.now(),
+                RewardsTable.penaltyTraits3DRewards,
+            ).filter(RewardsTable.xrpId == xrpId)
             result = await session.execute(query)
             result = result.first()
 
@@ -92,6 +95,10 @@ class XparrotDB:
             # Check if there are results
             # No result would only mean that xrpId is not found
             funcResult = self.check_cooldown(result, funcResult)
+            if funcResult["result"] == "Claimable":
+                x, y, nftCount = result
+                if nftCount < coinsConfig.getfloat("min_nft_count"):
+                    funcResult["result"] = "minNFTCount"
 
             loggingInstance.info(f"getBonusStatus({xrpId}): {funcResult['result']}")
 

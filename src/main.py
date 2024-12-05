@@ -143,7 +143,7 @@ async def checkStatus(result, ctx, rewardName):
 
     elif result["result"] == "minNFTCount":
         embed = prepare_message(
-            f"Your XRP ID does not hold enough OG NFTs. You must hold a min of {MIN_NFT_TO_CLAIM} OG NFT to claim daily OGcoins based on AMM LP tokens."
+            f"Your XRP ID does not hold enough OG NFTs. You must hold a min of {MIN_NFT_TO_CLAIM} OG NFT to the bonus tokens."
         )
         await ctx.send(embed=embed)
         return
@@ -214,10 +214,26 @@ async def bonusXrain(ctx: InteractionContext):
 
     claimInfo = await dbInstance.getBonusAmount(xrpId)
     if claimInfo["result"] == "Success":
-        claimAmount = claimInfo["amount"]
         claimImage = claimInfo["nftLink"]
         tokenId = claimInfo["tokenId"]
-        taxonId = claimInfo["taxonId"]
+
+        claimAmount = xrplInstance.getAccountBalance(xrpId, coinsConfig["XRAIN"])
+        minXrainCount = coinsConfig.getfloat("min_xrain_count")
+
+        if claimAmount and claimAmount < minXrainCount:
+            embed = prepare_message(
+                message=f"Your XRP ID does not hold enough $XRAIN. You must hold a min of {minXrainCount} $XRAIN and {MIN_NFT_TO_CLAIM} OG NFT to claim daily XRAIN reward.",
+                title="Daily Claim",
+            )
+            button = Button(
+                style=ButtonStyle.URL,
+                label="Buy More",
+                url=coinsConfig.get("xrain_buy_link"),
+            )
+            await ctx.send(embed=embed, components=button)
+            return
+
+        claimAmount *= coinsConfig.getfloat("daily_multiplier")
 
         sendSuccess = await sendCoin(
             value=claimAmount,
