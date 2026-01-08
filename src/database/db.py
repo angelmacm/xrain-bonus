@@ -148,7 +148,7 @@ class XparrotDB:
                     return funcResult
 
                 funcResult["result"] = "Success"
-                funcResult["nftLink"] = nftLink
+                funcResult["nftLink"] = update_nftLink(nftLink)
                 funcResult["amount"] = xrainValue
                 funcResult["tokenId"] = tokenId
                 funcResult["taxonId"] = taxonId
@@ -263,7 +263,7 @@ class XparrotDB:
                     )
                     return "NoNFTFound"
 
-                funcResult["nftLink"] = nftLink
+                funcResult["nftLink"] = update_nftLink(nftLink)
                 funcResult["tokenId"] = tokenId
                 funcResult["taxonId"] = taxonId
                 (
@@ -425,3 +425,13 @@ class XparrotDB:
             lastEst += timedelta(days=-1)
 
         return lastEst.astimezone(timezone.utc)
+
+
+def update_nftLink(nftLink):
+    if not isinstance(nftLink, str):
+        return nftLink
+    if "ipfs.bithomp.com" in nftLink:
+        return nftLink
+    return nftLink.replace(".ipfs.w3s.link", "").replace(
+        "https://", "https://ipfs.bithomp.com/image/"
+    )
