@@ -59,3 +59,4 @@ class NFTTraitList(Base):
     sellAmt = Column(Integer)
     sellDate = Column(Date)
     reputationFlag = Column(Integer)
+    nftGroupName = column_property(Column("NFTGroupName", VARCHAR))
