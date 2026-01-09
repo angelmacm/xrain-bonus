@@ -130,8 +130,8 @@ class XRPClient:
             return False
 
         except Exception as e:
-            loggingInstance.error(
-                f"Error processing {value} {coinHex} for {address}: {str(e)}"
+            loggingInstance.exception(
+                f"Error processing {value} {coinHex} for {address}: {str(e) or 'No error message'}"
             )
             funcResult["result"] = False
             funcResult["error"] = e
@@ -154,7 +154,7 @@ class XRPClient:
             loggingInstance.info("Wallet registered successfully")
             return {"result": True, "error": "success"}
         except Exception as e:
-            loggingInstance.error("Error in wallet registration")
+            loggingInstance.exception("Error in wallet registration")
             return {"result": False, "error": e}
 
     def getTestMode(self) -> bool:
