@@ -36,11 +36,7 @@ class XRPClient:
         if memos:
             memoData = memos.encode("utf-8").hex()
 
-        (
-            loggingInstance.info("Preparing payment package...")
-            if self.verbose
-            else None
-        )  # For debugging purposes
+        loggingInstance.debug("Preparing payment package...")
         try:
             if coinHex.upper() == "XRP":
                 # Use xrp_to_drops if the currency is XRP
@@ -53,11 +49,7 @@ class XRPClient:
                 )
             else:
 
-                (
-                    loggingInstance.info("Checking for trustline...")
-                    if self.verbose
-                    else None
-                )
+                loggingInstance.debug("Checking for trustline...")
                 # Get the coin issuer from the trustline that is set on the sender's account
                 coinIssuer = self.config.get("coin_issuer")
 
@@ -67,7 +59,7 @@ class XRPClient:
                     funcResult["result"] = False
                     return funcResult
 
-                loggingInstance.info("Trustline found!...") if self.verbose else None
+                loggingInstance.debug("Trustline found!...")
 
                 # Prepare the payment transaction format along with the given fields
                 payment = Payment(
@@ -84,28 +76,20 @@ class XRPClient:
             # Retry logic should there be a network problem
             retries = 3
             for attempt in range(retries):
-                (
-                    loggingInstance.info(
-                        f"   Attempt #{attempt+1} in sending {value} {coinHex} to {address}"
-                    )
-                    if self.verbose
-                    else None
-                )  # For debugging purposes
+                loggingInstance.debug(
+                    f"Attempt #{attempt+1} in sending {value} {coinHex} to {address}"
+                )
                 try:
                     async with AsyncWebsocketClient(self.xrpLink) as client:
-                        (
-                            loggingInstance.info(
-                                f"Submitting payment transaction: {payment.to_dict()}"
-                            )
-                            if self.verbose
-                            else None
+                        loggingInstance.debug(
+                            f"Submitting payment transaction: {payment.to_dict()}"
                         )
 
                         autofilledTx = await autofill(
                             transaction=payment, client=client
                         )
 
-                        loggingInstance.info(
+                        loggingInstance.debug(
                             f"Autofilled transaction: {autofilledTx.to_dict()}"
                         )
 
@@ -124,34 +108,20 @@ class XRPClient:
                             autofill=False,
                         )
 
-                        (
-                            loggingInstance.info(f"Transaction result: {result.result}")
-                            if self.verbose
-                            else None
-                        )
+                        loggingInstance.debug(f"Transaction result: {result.result}")
 
                     if result.is_successful():
-                        loggingInstance.info("Success") if self.verbose else None
+                        loggingInstance.info("Transaction successful")
                         funcResult["result"] = True
                         return funcResult
                     else:
                         raise Exception(result.result)
                 except Exception as e:
-                    (
-                        loggingInstance.error(
-                            f"Exception in transaction submission: {e}"
-                        )
-                        if self.verbose
-                        else None
-                    )
+                    loggingInstance.error(f"Exception in transaction submission: {e}")
 
                     if "noCurrent" in str(e) or "overloaded" in str(e):
-                        (
-                            loggingInstance.info(
-                                f"Attempt {attempt + 1} failed: {e}. Retrying..."
-                            )
-                            if self.verbose
-                            else None
+                        loggingInstance.warning(
+                            f"Attempt {attempt + 1} failed: {e}. Retrying..."
                         )
                         await sleep(5)  # Wait before retrying
                     else:
@@ -160,13 +130,9 @@ class XRPClient:
             return False
 
         except Exception as e:
-            (
-                loggingInstance.error(
-                    f"Error processing {value} {coinHex} for {address}: {str(e)}"
-                )
-                if self.verbose
-                else None
-            )  # For debugging purposes
+            loggingInstance.error(
+                f"Error processing {value} {coinHex} for {address}: {str(e)}"
+            )
             funcResult["result"] = False
             funcResult["error"] = e
             return funcResult
@@ -183,20 +149,12 @@ class XRPClient:
 
     async def registerSeed(self, seed) -> dict:
         try:
-            (
-                loggingInstance.info("Registering Wallet...") if self.verbose else None
-            )  # For debugging purposes
+            loggingInstance.debug("Registering Wallet...")
             self.wallet = Wallet.from_seed(seed)
-            (
-                loggingInstance.info("Registering Success!") if self.verbose else None
-            )  # For debugging purposes
+            loggingInstance.info("Wallet registered successfully")
             return {"result": True, "error": "success"}
         except Exception as e:
-            (
-                loggingInstance.error(f"Error in wallet registration")
-                if self.verbose
-                else None
-            )  # For debugging purposes
+            loggingInstance.error("Error in wallet registration")
             return {"result": False, "error": e}
 
     def getTestMode(self) -> bool:
