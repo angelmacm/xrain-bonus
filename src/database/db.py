@@ -11,6 +11,19 @@ from pytz import timezone as tz
 from utils.logging import loggingInstance
 from utils.config import coinsConfig
 
+default_images = {
+    "3D XChameleons": "https://drive.google.com/drive-viewer/AKGpihY9B0Ok1Q5d1q7ymGOY0l9Ctjk8URE0peEQEWYEP9HlL3qOt7aMuezmZOX6Xtc_MKbkHWrPSuyk8bdku4ezTxoJv-1VZo0q1PY=w1111-h917-rw-v1",
+    "3D Bad XParrots": "https://drive.google.com/drive-viewer/AKGpihbmFwk13czo8620g1bd7BnxjwaWhL_3c_YL9mEknxsMGq7lKs-RQKJGHwcjMMlsL9GKzz1zYpNPXZF0cSW57x1PSXbwvzmUAko=w1111-h917-rw-v1",
+    "3D Good XParrots": "https://drive.google.com/drive-viewer/AKGpihbmFwk13czo8620g1bd7BnxjwaWhL_3c_YL9mEknxsMGq7lKs-RQKJGHwcjMMlsL9GKzz1zYpNPXZF0cSW57x1PSXbwvzmUAko=w1111-h917-rw-v1",
+    "3D XParrots": "https://drive.google.com/drive-viewer/AKGpihbmFwk13czo8620g1bd7BnxjwaWhL_3c_YL9mEknxsMGq7lKs-RQKJGHwcjMMlsL9GKzz1zYpNPXZF0cSW57x1PSXbwvzmUAko=w1111-h917-rw-v1",
+    "OG Genesis Keys": "https://drive.google.com/drive-viewer/AKGpihZ8KgzCsAJ6sATShe3xwMXuWV90NqdFpQ5GeixB4vwg26u13G4Z5nNSO-alJJu4VPsp6leeOUGnwLD_YgYbqImNTrSpiNIMVSM=w1111-h917-rw-v1",
+    "XRPL Moonbirds": "https://drive.google.com/drive-viewer/AKGpihYQS43mnX_m3_Z_JcedI_Pd0OoRJWTr6yp-JS3Qz-ubs9ltZTcjfjDwMcfLOSTTzr9f3oMlF6T1U5ZMtXYQOOVMqBUtPETa-wA=w1111-h917",
+    "XRPLMoonbirds": "https://drive.google.com/drive-viewer/AKGpihYQS43mnX_m3_Z_JcedI_Pd0OoRJWTr6yp-JS3Qz-ubs9ltZTcjfjDwMcfLOSTTzr9f3oMlF6T1U5ZMtXYQOOVMqBUtPETa-wA=w1111-h917",
+    "XChameleons": "https://drive.google.com/drive-viewer/AKGpihZNZl7cb0eP-a3jEDT19ycxxztsJBcXyd-5AsZUyKoKhsM5x9l961FuzghfzfthggvnmHF47Jytg_UsJ3TLO77klPn3ns_sIXE=w1111-h917",
+    "Collab XParrots": "https://drive.google.com/drive-viewer/AKGpihZMuhRvrfffWz8hg2QbwDtOtMswvY4d38V8e_PybgHwXHok5MiGlpVYOraFXv_8rn8bUkj21kLplcBbmucFrOkhcvXgaFwu4GQ=w1111-h917",
+    "XParrots": "https://drive.google.com/drive-viewer/AKGpihZMuhRvrfffWz8hg2QbwDtOtMswvY4d38V8e_PybgHwXHok5MiGlpVYOraFXv_8rn8bUkj21kLplcBbmucFrOkhcvXgaFwu4GQ=w1111-h917",
+}
+
 
 class XparrotDB:
     def __init__(self, host, dbName, username, password, verbose):
@@ -119,6 +132,7 @@ class XparrotDB:
                     NFTTraitList.nftlink,
                     NFTTraitList.tokenId,
                     NFTTraitList.taxonId,
+                    NFTTraitList.nftGroupName,
                 )
                 .filter(NFTTraitList.xrpId == xrpId, NFTTraitList.nftlink != "")
                 .order_by(func.random())
@@ -134,7 +148,7 @@ class XparrotDB:
             )
 
             if queryResult:
-                xrainValue, nftLink, tokenId, taxonId = queryResult
+                xrainValue, nftLink, tokenId, taxonId, nftGroupName = queryResult
 
                 if nftLink == "":
                     funcResult["result"] = "ImageLinkNotFound"
@@ -148,7 +162,7 @@ class XparrotDB:
                     return funcResult
 
                 funcResult["result"] = "Success"
-                funcResult["nftLink"] = update_nftLink(nftLink)
+                funcResult["nftLink"] = update_nftLink(nftLink, nftGroupName)
                 funcResult["amount"] = xrainValue
                 funcResult["tokenId"] = tokenId
                 funcResult["taxonId"] = taxonId
@@ -238,7 +252,12 @@ class XparrotDB:
         async with self.asyncSessionMaker() as session:
             funcResult = {"nftLink": None, "tokenId": None, "taxonId": None}
             query = (
-                select(NFTTraitList.nftlink, NFTTraitList.tokenId, NFTTraitList.taxonId)
+                select(
+                    NFTTraitList.nftlink,
+                    NFTTraitList.tokenId,
+                    NFTTraitList.taxonId,
+                    NFTTraitList.nftGroupName,
+                )
                 .filter(NFTTraitList.xrpId == xrpId, NFTTraitList.nftlink != "")
                 .order_by(func.random())
                 .limit(1)
@@ -253,7 +272,7 @@ class XparrotDB:
             )
 
             if queryResult:
-                nftLink, tokenId, taxonId = queryResult
+                nftLink, tokenId, taxonId, nftGroupName = queryResult
 
                 if nftLink == "":
                     (
@@ -263,7 +282,7 @@ class XparrotDB:
                     )
                     return "NoNFTFound"
 
-                funcResult["nftLink"] = update_nftLink(nftLink)
+                funcResult["nftLink"] = update_nftLink(nftLink, nftGroupName)
                 funcResult["tokenId"] = tokenId
                 funcResult["taxonId"] = taxonId
                 (
@@ -427,7 +446,12 @@ class XparrotDB:
         return lastEst.astimezone(timezone.utc)
 
 
-def update_nftLink(nftLink):
+def update_nftLink(nftLink, nftGroupName=None):
+    if not nftLink:
+        placeholder_image = default_images.get(nftGroupName)
+        if placeholder_image is None:
+            raise ValueError("No NFT link image available.")
+        return placeholder_image
     if not isinstance(nftLink, str):
         return nftLink
     if "ipfs.bithomp.com" in nftLink:
