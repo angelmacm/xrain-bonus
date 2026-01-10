@@ -6,6 +6,7 @@ from xrpl.models.transactions import Payment, Memo
 from xrpl.utils import xrp_to_drops
 from xrpl.models.requests.account_lines import AccountLines
 from asyncio import sleep
+from asyncio.exceptions import TimeoutError, CancelledError
 from configparser import ConfigParser
 
 from requests import Session
@@ -116,6 +117,21 @@ class XRPClient:
                         return funcResult
                     else:
                         raise Exception(result.result)
+                except (TimeoutError, CancelledError, ConnectionError, OSError) as e:
+                    loggingInstance.warning(
+                        f"Connection error on attempt {attempt + 1}: {e}. Retrying..."
+                    )
+                    if attempt < retries - 1:
+                        await sleep(5)  # Wait before retrying
+                    else:
+                        loggingInstance.error(
+                            f"Failed to send transaction after {retries} attempts"
+                        )
+                        funcResult["result"] = False
+                        funcResult["error"] = (
+                            f"Connection timeout after {retries} retries"
+                        )
+                        return funcResult
                 except Exception as e:
                     loggingInstance.error(f"Exception in transaction submission: {e}")
 
@@ -123,11 +139,19 @@ class XRPClient:
                         loggingInstance.warning(
                             f"Attempt {attempt + 1} failed: {e}. Retrying..."
                         )
-                        await sleep(5)  # Wait before retrying
+                        if attempt < retries - 1:
+                            await sleep(5)  # Wait before retrying
+                        else:
+                            funcResult["result"] = False
+                            funcResult["error"] = str(e)
+                            return funcResult
                     else:
                         raise e
 
-            return False
+            # If we've exhausted all retries without success
+            funcResult["result"] = False
+            funcResult["error"] = "Failed after all retry attempts"
+            return funcResult
 
         except Exception as e:
             loggingInstance.exception(

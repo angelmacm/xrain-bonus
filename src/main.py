@@ -96,6 +96,12 @@ async def sendCoin(value, address, memos, ctx):
                 description=f"Please setup XRAIN trustline to claim rewards by clicking this [link](https://xrpl.services/?issuer=rh3tLHbXwZsp7eciw2Qp8g7bN9RnyGa2pF&currency=585241494E000000000000000000000000000000&limit=21000000)",
                 timestamp=datetime.now(),
             )
+        elif "Connection timeout" in str(sendSuccess["error"]):
+            embed = Embed(
+                title="XRAIN Claim",
+                description=f"Error connecting to the XRPL Server, please try again",
+                timestamp=datetime.now(),
+            )
         else:
             embed = Embed(
                 title="XRAIN Claim",
